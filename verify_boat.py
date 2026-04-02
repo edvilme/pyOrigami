@@ -17,7 +17,7 @@ boat = Diagram(
     body=[
         # Step 1
         Step(body=[
-            VerticalRectangle("a", "b", "c", "d", "A"),
+            VerticalRectangle("a", "b", "c", "d", PaperFormat.A),
             Assign("ad", Middle("a", "d")),
             Assign("bc", Middle("b", "c")),
             ValleyFold("ad", "bc"),
@@ -64,4 +64,5 @@ boat = Diagram(
     ],
 )
 
-print(write(boat))
+if __name__ == "__main__":
+    print(write(boat))
