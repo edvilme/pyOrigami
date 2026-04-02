@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which
+from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which, string_quote
 
 
 # ── Comments ──────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ class Designer:
     name: str
 
     def to_doo(self) -> str:
-        return f'\\designer("{self.name}")'
+        return f'\\designer({string_quote(self.name)})'
 
 
 @dataclass
@@ -156,7 +156,7 @@ class Title:
     name: str
 
     def to_doo(self) -> str:
-        return f'\\title("{self.name}")'
+        return f'\\title({string_quote(self.name)})'
 
 
 @dataclass
@@ -168,7 +168,7 @@ class Diagrammer:
     name: str
 
     def to_doo(self) -> str:
-        return f'\\diagrammer("{self.name}")'
+        return f'\\diagrammer({string_quote(self.name)})'
 
 
 @dataclass
@@ -206,7 +206,7 @@ class Comment:
     text: str
 
     def to_doo(self) -> str:
-        return f'\\comment("{self.text}")'
+        return f'\\comment({string_quote(self.text)})'
 
 
 @dataclass
@@ -1071,7 +1071,7 @@ class Caption:
     text: str
 
     def to_doo(self) -> str:
-        return f'\\caption("{self.text}")'
+        return f'\\caption({string_quote(self.text)})'
 
 
 @dataclass
@@ -1111,7 +1111,7 @@ class Text:
     text: str
 
     def to_doo(self) -> str:
-        return f'\\text({self.vertex}, "{self.text}")'
+        return f'\\text({self.vertex}, {string_quote(self.text)})'
 
 
 # ── Step / page layout ───────────────────────────────────────────────
@@ -1292,4 +1292,5 @@ class Include:
     filename: str
 
     def to_doo(self) -> str:
-        return f'\\include("{self.filename}")'
+        return f'\\include({string_quote(self.filename)})'
+

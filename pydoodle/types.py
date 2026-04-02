@@ -114,3 +114,10 @@ Color = tuple[int, int, int] | str
 Either an ``(R, G, B)`` tuple with integer components (Doodle uses a
 percentage-like scale) or a named colour string such as ``"white"``.
 """
+
+
+def string_quote(s: str) -> str:
+    """Wrap *s* in double quotes, escaping characters that would break .doo syntax."""
+    s = s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+    return f'"{s}"'
+
