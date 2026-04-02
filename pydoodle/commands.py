@@ -401,7 +401,7 @@ class Middle:
     """Creates a new vertex at the midpoint of two existing vertices.
 
     The two given vertices need not have a physical edge between them.
-    Maps to ``RETURN = \\middle(v1, v2);``.
+    Maps to ``\\middle(v1, v2)``.  Wrap in ``Assign`` to capture the result.
     """
     v1: str
     v2: str
@@ -417,7 +417,8 @@ class Fraction:
     An extension of ``\\middle``; the new vertex is located at
     ``numerator / denominator`` of the distance from *v1* to *v2*.
     Values outside [0, 1] place the point beyond the segment endpoints.
-    Maps to ``RETURN = \\fraction(v1, v2, numerator, denominator);``.
+    Maps to ``\\fraction(v1, v2, numerator, denominator)``.  Wrap in
+    ``Assign`` to capture the result.
     """
     v1: str
     v2: str
@@ -436,8 +437,9 @@ class Intersection:
     of vertices, so the result may not lie on the physical segments.
     Accepts either two ``Edge`` objects or four vertices via the
     ``from_vertices`` class method.
-    Maps to ``RETURN = \\intersection(edge1, edge2);``
-    or ``RETURN = \\intersection(v1, v2, v3, v4);``.
+    Maps to ``\\intersection(edge1, edge2)``
+    or ``\\intersection(v1, v2, v3, v4)``.  Wrap in ``Assign`` to
+    capture the result.
     """
     edge1: Edge
     edge2: Edge
@@ -457,7 +459,8 @@ class InterCut:
     A shortcut combining ``\\intersection`` and ``\\cut``.  After this
     operation the first edge is split into two new sub-edges at the
     returned vertex, and the original edge no longer exists.
-    Maps to ``RETURN = \\inter_cut(edge1, edge2);``.
+    Maps to ``\\inter_cut(edge1, edge2)``.  Wrap in ``Assign`` to
+    capture the result.
     """
     edge1: Edge
     edge2: Edge
@@ -473,7 +476,8 @@ class PointToPoint:
     Given a *moving* vertex and a *dest* vertex, returns the two
     intersection points of the fold line (perpendicular bisector) with
     *edge1* and *edge2* respectively.
-    Maps to ``[RET1, RET2] = \\point_to_point(moving, dest, edge1, edge2);``.
+    Maps to ``\\point_to_point(moving, dest, edge1, edge2)``.  Wrap in
+    ``AssignPair`` to capture both results.
     """
     moving: str
     dest: str
@@ -492,7 +496,8 @@ class PointToLine:
     intersects *edge*.  *limit_edge* is the edge on which the point must
     arrive.  When two solutions exist, *which* selects ``FIRST`` or
     ``SECOND``.
-    Maps to ``RETURN = \\point_to_line(moving, pivot, limit_edge, edge[, which]);``.
+    Maps to ``\\point_to_line(moving, pivot, limit_edge, edge[, which])``.
+    Wrap in ``Assign`` to capture the result.
     """
     moving: str
     pivot: str
@@ -520,8 +525,9 @@ class LineToLine:
     of the angle at *arg1* (common vertex) through *arg2* and *arg3*,
     returning its intersection with *arg4* (an edge).
 
-    Maps to ``[R1, R2] = \\line_to_line(e1, e2, e3, e4);``
-    or ``R = \\line_to_line(v1, v2, v3, edge);``.
+    Maps to ``\\line_to_line(e1, e2, e3, e4)``
+    or ``\\line_to_line(v1, v2, v3, edge)``.  Wrap in ``AssignPair``
+    or ``Assign`` depending on the syntax used.
     """
     arg1: Edge | str
     arg2: Edge | str
@@ -545,7 +551,8 @@ class Symmetry:
 
     The axis is given as an ``Edge`` (pair of vertices); the edge need
     not physically exist.
-    Maps to ``RETURN = \\symmetry(vertex, edge);``.
+    Maps to ``\\symmetry(vertex, edge)``.  Wrap in ``Assign`` to
+    capture the result.
     """
     vertex: str
     edge: Edge
@@ -558,7 +565,8 @@ class Symmetry:
 class Parallel:
     """Creates a vertex where a line parallel to *edge* through *vertex* meets *limit_edge*.
 
-    Maps to ``RETURN = \\parallel(edge, vertex, limit_edge);``.
+    Maps to ``\\parallel(edge, vertex, limit_edge)``.  Wrap in
+    ``Assign`` to capture the result.
     """
     edge: Edge
     vertex: str
@@ -575,7 +583,8 @@ class Perpendicular:
     Without *limit_edge*, the returned point lies on the reference edge
     itself (i.e. is the foot of the perpendicular).  With *limit_edge*,
     the perpendicular is extended until it intersects that edge.
-    Maps to ``RETURN = \\perpendicular(edge, vertex[, limit_edge]);``.
+    Maps to ``\\perpendicular(edge, vertex[, limit_edge])``.  Wrap in
+    ``Assign`` to capture the result.
     """
     edge: Edge
     vertex: str
@@ -604,8 +613,9 @@ class RabbitEar:
     An optional *edge* parameter constrains where the result vertex is
     found (defaults to ``[moving, dest]``).
 
-    Maps to ``[V, C] = \\rabbit_ear(moving, dest, v3[, edge]);``
-    or ``V = \\rabbit_ear(moving, dest, v3, center[, edge]);``.
+    Maps to ``\\rabbit_ear(moving, dest, v3[, edge])``
+    or ``\\rabbit_ear(moving, dest, v3, center[, edge])``.  Wrap in
+    ``AssignPair`` or ``Assign`` depending on the syntax used.
     """
     moving: str
     dest: str
