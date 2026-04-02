@@ -220,7 +220,7 @@ class ColorFront:
     color: Color
 
     def to_doo(self) -> str:
-        if isinstance(self.color, tuple):
+        if type(self.color) is tuple:
             r, g, b = self.color
             return f"\\color_front({r}, {g}, {b})"
         return f"\\color_front({self.color})"
@@ -236,7 +236,7 @@ class ColorBack:
     color: Color
 
     def to_doo(self) -> str:
-        if isinstance(self.color, tuple):
+        if type(self.color) is tuple:
             r, g, b = self.color
             return f"\\color_back({r}, {g}, {b})"
         return f"\\color_back({self.color})"
