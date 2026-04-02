@@ -29,6 +29,9 @@ class Side(Enum):
     FRONT = "front"
     BACK = "back"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class ArrowHead(Enum):
     """Type of arrow head drawn at an arrow extremity.
@@ -45,6 +48,9 @@ class ArrowHead(Enum):
     UNFOLD = "unfold"
     NONE = "none"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class ArrowSide(Enum):
     """Orientation side of an arrow relative to its direction.
@@ -54,6 +60,9 @@ class ArrowSide(Enum):
     """
     LEFT = "left"
     RIGHT = "right"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class Which(Enum):
@@ -65,6 +74,25 @@ class Which(Enum):
     """
     FIRST = "first"
     SECOND = "second"
+
+    def __str__(self) -> str:
+        return self.value
+
+
+class PaperFormat(Enum):
+    """Named paper format for rectangle aspect ratios.
+
+    Used by ``\\horizontal_rectangle`` and ``\\vertical_rectangle`` as
+    an alternative to specifying a numeric ratio percentage.
+
+    * ``A`` — ISO A-series proportion (1 : √2 ≈ 141%).
+    * ``DOLLAR`` — US dollar bill proportion.
+    """
+    A = "A"
+    DOLLAR = "dollar"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 Limit = int | Edge

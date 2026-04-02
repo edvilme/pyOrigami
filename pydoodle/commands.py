@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, Side, Which
+from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which
 
 
 # ── Comments ──────────────────────────────────────────────────────────
@@ -363,7 +363,7 @@ class HorizontalRectangle:
     v2: str
     v3: str
     v4: str
-    ratio: int | str | None = None
+    ratio: int | PaperFormat | None = None
 
     def to_doo(self) -> str:
         args = [self.v1, self.v2, self.v3, self.v4]
@@ -385,7 +385,7 @@ class VerticalRectangle:
     v2: str
     v3: str
     v4: str
-    ratio: int | str | None = None
+    ratio: int | PaperFormat | None = None
 
     def to_doo(self) -> str:
         args = [self.v1, self.v2, self.v3, self.v4]
@@ -504,7 +504,7 @@ class PointToLine:
         args = [self.moving, self.pivot,
                 self.limit_edge.to_doo(), self.edge.to_doo()]
         if self.which != Which.FIRST:
-            args.append(self.which.value)
+            args.append(str(self.which))
         return f"\\point_to_line({', '.join(args)})"
 
 
@@ -834,8 +834,8 @@ class SimpleArrow:
     def to_doo(self) -> str:
         d = self.dst.to_doo() if isinstance(self.dst, Edge) else self.dst
         args = [self.src, d,
-                self.src_arrow.value, self.dst_arrow.value,
-                self.side.value]
+                str(self.src_arrow), str(self.dst_arrow),
+                str(self.side)]
         if self.arc is not None:
             args.append(str(self.arc))
         return f"\\simple_arrow({', '.join(args)})"
@@ -860,8 +860,8 @@ class ReturnArrow:
 
     def to_doo(self) -> str:
         args = [self.edge1.to_doo(), self.edge2.to_doo(),
-                self.src_arrow.value, self.dst_arrow.value,
-                self.side.value]
+                str(self.src_arrow), str(self.dst_arrow),
+                str(self.side)]
         if self.ratio is not None:
             args.append(str(self.ratio))
         return f"\\return_arrow({', '.join(args)})"
@@ -879,7 +879,7 @@ class OpenArrow:
     side: ArrowSide = ArrowSide.RIGHT
 
     def to_doo(self) -> str:
-        return f"\\open_arrow({self.edge.to_doo()}, {self.side.value})"
+        return f"\\open_arrow({self.edge.to_doo()}, {self.side})"
 
 
 @dataclass
@@ -1001,7 +1001,7 @@ class Fill:
     vertices: list[str]
 
     def to_doo(self) -> str:
-        args = [self.side.value] + self.vertices
+        args = [str(self.side)] + self.vertices
         return f"\\fill({', '.join(args)})"
 
 
@@ -1033,7 +1033,7 @@ class Darker:
     amount: int
 
     def to_doo(self) -> str:
-        return f"\\darker({self.side.value}, {self.amount})"
+        return f"\\darker({self.side}, {self.amount})"
 
 
 @dataclass
@@ -1047,7 +1047,7 @@ class Lighter:
     amount: int
 
     def to_doo(self) -> str:
-        return f"\\lighter({self.side.value}, {self.amount})"
+        return f"\\lighter({self.side}, {self.amount})"
 
 
 # ── Text operators ───────────────────────────────────────────────────

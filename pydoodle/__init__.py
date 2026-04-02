@@ -1,4 +1,4 @@
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, Side, Which
+from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which
 from .writer import write, write_file
 from .commands import (
     Assign,
@@ -79,7 +79,7 @@ from .commands import (
 
 __all__ = [
     # Types
-    "ArrowHead", "ArrowSide", "Color", "Edge", "Limit", "Side", "Which",
+    "ArrowHead", "ArrowSide", "Color", "Edge", "Limit", "PaperFormat", "Side", "Which",
     # Writer
     "write", "write_file",
     # Structure
