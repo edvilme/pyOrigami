@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
 
 from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which
 
