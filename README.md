@@ -10,6 +10,60 @@ pyOrigami lets you programmatically generate `.doo` diagram files that describe 
 
 The `.doo` file format originates from the [DOODLE](https://doodle.sourceforge.net/) project, a tool for creating origami diagrams.
 
+## Building locally
+
+### Prerequisites
+
+- Python 3.9+
+- A C++ compiler (MSVC on Windows, gcc/clang on Linux/macOS)
+- [pybind11](https://pybind11.readthedocs.io/) (installed automatically by the build)
+
+### Clone (with submodules)
+
+```bash
+git clone --recurse-submodules https://github.com/<owner>/pyOrigami.git
+cd pyOrigami
+```
+
+If you already cloned without `--recurse-submodules`:
+
+```bash
+git submodule update --init --recursive
+```
+
+### Install in development mode
+
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux / macOS
+source .venv/bin/activate
+
+pip install --no-build-isolation -e .
+```
+
+`--no-build-isolation` lets setuptools use the pybind11 already installed in your
+environment. Drop it if you prefer a fully isolated build (pip will fetch build
+dependencies automatically).
+
+### Quick test
+
+```python
+from pydoodle import render_file
+
+ps_path = render_file("examples/simple_boat.doo")
+print(f"Generated {ps_path}")
+```
+
+Or from the command line:
+
+```bash
+python -c "from pydoodle import render_file; print(render_file('examples/simple_boat.doo'))"
+```
+
+This should produce a `.ps` (PostScript) file next to the input `.doo` file.
+
 ## Examples
 
 See the [examples/](examples/) directory for sample `.doo` files.
