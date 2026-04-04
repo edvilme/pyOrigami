@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import dataclasses
 import tempfile
 from pathlib import Path
 
 from . import commands as cmd
 from .writer import write
 from ._doodle import render_to_ps as _render_to_ps
+from ._doodle import render_step_to_ps as _render_step_to_ps
 
 
 def render(
@@ -96,11 +96,10 @@ def render_up_to_step(
 ) -> Path:
     """Render a Diagram up to and including a specific step.
 
-    Only the diagram steps numbered 1 through *step* are included in the
-    output.  Inter-step directives (e.g. ``\\scale``, ``\\rotate``,
-    ``\\turn_over_vertical``) that appear **before** the requested step
-    boundary are preserved so that the geometry remains correct.  No page
-    layout beyond what those steps produce is emitted.
+    Only the diagram steps numbered 1 through *step* are rendered.
+    Inter-step directives (e.g. ``\\scale``, ``\\rotate``,
+    ``\\turn_over_vertical``) are fully processed by the native parser so
+    the geometry and layout remain correct.
 
     Parameters
     ----------
@@ -126,14 +125,22 @@ def render_up_to_step(
     if step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
 
-    filtered_body: list = []
-    step_count = 0
-    for item in diagram.body:
-        if isinstance(item, cmd.Step):
-            step_count += 1
-            if step_count > step:
-                break
-        filtered_body.append(item)
+    doo_text = write(diagram)
 
-    truncated = dataclasses.replace(diagram, body=filtered_body)
-    return render(truncated, output, verbose=verbose)
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".doo", delete=False, encoding="utf-8"
+    ) as tmp:
+        tmp.write(doo_text)
+        tmp.write("\n")
+        doo_path = Path(tmp.name)
+
+    try:
+        if output is None:
+            output = doo_path.with_suffix(".ps")
+        else:
+            output = Path(output)
+
+        _render_step_to_ps(str(doo_path), str(output), step, verbose)
+        return output
+    finally:
+        doo_path.unlink(missing_ok=True)
