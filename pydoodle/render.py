@@ -7,6 +7,7 @@ intermediate ``.ps`` file via Ghostscript.
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
@@ -125,7 +126,9 @@ def render_diagram(
         if fmt is OutputFormat.PS:
             _render_to_ps(str(doo_path), str(output), verbose)
         else:
-            ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
+            fd, ps_name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            ps_path = Path(ps_name)
             try:
                 _render_to_ps(str(doo_path), str(ps_path), verbose)
                 _ps_to_pdf(ps_path, output)
@@ -200,7 +203,9 @@ def render_step(
         if fmt is OutputFormat.PS:
             _render_step_to_ps(str(doo_path), str(output), step, verbose)
         else:
-            ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
+            fd, ps_name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            ps_path = Path(ps_name)
             try:
                 _render_step_to_ps(str(doo_path), str(ps_path), step, verbose)
                 _ps_to_pdf(ps_path, output)
