@@ -20,19 +20,6 @@ from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
 
 
-def _resolve_format(format: OutputFormat | str) -> OutputFormat:
-    """Normalise a format argument to an ``OutputFormat`` enum member."""
-    if isinstance(format, OutputFormat):
-        return format
-    try:
-        return OutputFormat(format.lower())
-    except ValueError:
-        valid = ", ".join(repr(f.value) for f in OutputFormat)
-        raise ValueError(
-            f"Unsupported format {format!r}; expected one of {valid}"
-        ) from None
-
-
 # ---------------------------------------------------------------------------
 # Private helper – PS → PDF conversion
 # ---------------------------------------------------------------------------
@@ -82,7 +69,7 @@ def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
 
 def render_diagram(
     diagram: cmd.Diagram,
-    format: OutputFormat | str = OutputFormat.PDF,
+    format: OutputFormat = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
@@ -94,8 +81,8 @@ def render_diagram(
     diagram:
         A pydoodle ``Diagram`` object.
     format:
-        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
-        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
+        Output format – ``OutputFormat.PS`` for PostScript or
+        ``OutputFormat.PDF`` for PDF.
     output:
         Destination file path.  When *None* a temporary file is created
         with the appropriate extension.
@@ -106,7 +93,11 @@ def render_diagram(
     -------
     Path to the generated file.
     """
-    fmt = _resolve_format(format)
+    fmt = format
+    if not isinstance(fmt, OutputFormat):
+        raise TypeError(
+            f"format must be an OutputFormat enum member, got {type(format).__name__}"
+        )
 
     doo_text = write(diagram)
 
@@ -143,7 +134,7 @@ def render_diagram(
 def render_step(
     diagram: cmd.Diagram,
     step: int,
-    format: OutputFormat | str = OutputFormat.PDF,
+    format: OutputFormat = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
@@ -163,8 +154,8 @@ def render_step(
         Render only up to and including this step number (1-based).
         Must be ≥ 1.
     format:
-        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
-        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
+        Output format – ``OutputFormat.PS`` for PostScript or
+        ``OutputFormat.PDF`` for PDF.
     output:
         Destination file path.  When *None* a temporary file is created
         with the appropriate extension.
@@ -178,12 +169,16 @@ def render_step(
     Raises
     ------
     ValueError
-        If *step* is less than 1 or *format* is not supported.
+        If *step* is less than 1.
     """
     if step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
 
-    fmt = _resolve_format(format)
+    fmt = format
+    if not isinstance(fmt, OutputFormat):
+        raise TypeError(
+            f"format must be an OutputFormat enum member, got {type(format).__name__}"
+        )
 
     doo_text = write(diagram)
 
