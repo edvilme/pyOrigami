@@ -69,7 +69,7 @@ def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
 
 def render_diagram(
     diagram: cmd.Diagram,
-    format: OutputFormat = OutputFormat.PDF,
+    format: OutputFormat | str = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
@@ -81,8 +81,8 @@ def render_diagram(
     diagram:
         A pydoodle ``Diagram`` object.
     format:
-        Output format – ``OutputFormat.PS`` for PostScript or
-        ``OutputFormat.PDF`` for PDF.
+        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
+        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
     output:
         Destination file path.  When *None* a temporary file is created
         with the appropriate extension.
@@ -93,10 +93,14 @@ def render_diagram(
     -------
     Path to the generated file.
     """
-    if not isinstance(format, OutputFormat):
-        raise TypeError(
-            f"format must be an OutputFormat enum member, got {type(format).__name__}"
-        )
+    if isinstance(format, str):
+        try:
+            format = OutputFormat(format.lower())
+        except ValueError:
+            valid = ", ".join(repr(f.value) for f in OutputFormat)
+            raise ValueError(
+                f"Unsupported format {format!r}; expected one of {valid}"
+            ) from None
 
     doo_text = write(diagram)
 
@@ -133,7 +137,7 @@ def render_diagram(
 def render_step(
     diagram: cmd.Diagram,
     step: int,
-    format: OutputFormat = OutputFormat.PDF,
+    format: OutputFormat | str = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
@@ -153,8 +157,8 @@ def render_step(
         Render only up to and including this step number (1-based).
         Must be ≥ 1.
     format:
-        Output format – ``OutputFormat.PS`` for PostScript or
-        ``OutputFormat.PDF`` for PDF.
+        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
+        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
     output:
         Destination file path.  When *None* a temporary file is created
         with the appropriate extension.
@@ -168,15 +172,19 @@ def render_step(
     Raises
     ------
     ValueError
-        If *step* is less than 1.
+        If *step* is less than 1 or *format* is not supported.
     """
     if step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
 
-    if not isinstance(format, OutputFormat):
-        raise TypeError(
-            f"format must be an OutputFormat enum member, got {type(format).__name__}"
-        )
+    if isinstance(format, str):
+        try:
+            format = OutputFormat(format.lower())
+        except ValueError:
+            valid = ", ".join(repr(f.value) for f in OutputFormat)
+            raise ValueError(
+                f"Unsupported format {format!r}; expected one of {valid}"
+            ) from None
 
     doo_text = write(diagram)
 
