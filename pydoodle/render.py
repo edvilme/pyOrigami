@@ -1,7 +1,14 @@
-"""High-level Python API for rendering Doodle diagrams to PostScript."""
+"""High-level Python API for rendering Doodle diagrams to PDF.
+
+The C++ renderer produces PostScript which is then converted to PDF using
+Ghostscript (``gs``).  The original ``.ps`` file is removed after
+conversion unless *keep_ps* is set to ``True``.
+"""
 
 from __future__ import annotations
 
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -11,26 +18,94 @@ from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
 
 
+def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
+    """Convert a PostScript file to PDF using Ghostscript.
+
+    Raises
+    ------
+    RuntimeError
+        If Ghostscript (``gs``) is not found on the system or if the
+        conversion fails.
+    """
+    gs = shutil.which("gs")
+    if gs is None:
+        raise RuntimeError(
+            "Ghostscript ('gs') is required for PS to PDF conversion but "
+            "was not found on this system.  Install it with your package "
+            "manager (e.g. 'apt install ghostscript' or 'brew install "
+            "ghostscript')."
+        )
+
+    result = subprocess.run(
+        [
+            gs,
+            "-dNOPAUSE",
+            "-dBATCH",
+            "-dSAFER",
+            "-sDEVICE=pdfwrite",
+            "-dCompatibilityLevel=1.4",
+            f"-sOutputFile={pdf_path}",
+            str(ps_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Ghostscript PS→PDF conversion failed (exit {result.returncode}):\n"
+            f"{result.stderr}"
+        )
+
+
+def _render_and_convert(render_fn, output: Path, keep_ps: bool) -> Path:
+    """Run a C++ PS render function and convert the result to PDF.
+
+    *render_fn* is called with the path to the intermediate ``.ps`` file.
+    The PS file is converted to *output* (PDF) via Ghostscript.
+    """
+    # Use a unique temp path for the intermediate PS to avoid collisions
+    # when the caller-supplied output already has a .ps extension.
+    with tempfile.NamedTemporaryFile(
+        suffix=".ps", delete=False, dir=output.parent
+    ) as tmp:
+        ps_path = Path(tmp.name)
+
+    try:
+        render_fn(str(ps_path))
+        _ps_to_pdf(ps_path, output)
+    finally:
+        if keep_ps:
+            target = output.with_suffix(".ps")
+            if ps_path != target:
+                ps_path.rename(target)
+        else:
+            ps_path.unlink(missing_ok=True)
+
+
 def render(
     diagram: cmd.Diagram,
     output: str | Path | None = None,
     *,
+    keep_ps: bool = False,
     verbose: bool = False,
 ) -> Path:
-    """Render a Diagram object to PostScript.
+    """Render a Diagram object to PDF.
 
     Parameters
     ----------
     diagram:
         A pydoodle Diagram object.
     output:
-        Path for the .ps file. If None a temporary file is used.
+        Path for the ``.pdf`` file.  If *None* a temporary file is used.
+    keep_ps:
+        When *True* the intermediate PostScript file is kept alongside
+        the PDF.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated PDF file.
     """
     doo_text = write(diagram)
 
@@ -43,11 +118,15 @@ def render(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(".ps")
+            output = doo_path.with_suffix(".pdf")
         else:
             output = Path(output)
 
-        _render_to_ps(str(doo_path), str(output), verbose)
+        _render_and_convert(
+            lambda ps: _render_to_ps(str(doo_path), ps, verbose),
+            output,
+            keep_ps,
+        )
         return output
     finally:
         doo_path.unlink(missing_ok=True)
@@ -57,33 +136,42 @@ def render_file(
     doo_path: str | Path,
     output: str | Path | None = None,
     *,
+    keep_ps: bool = False,
     verbose: bool = False,
 ) -> Path:
-    """Render an existing .doo file to PostScript.
+    """Render an existing .doo file to PDF.
 
     Parameters
     ----------
     doo_path:
-        Path to a .doo input file.
+        Path to a ``.doo`` input file.
     output:
-        Path for the .ps file. Defaults to the input name with .ps.
+        Path for the ``.pdf`` file.  Defaults to the input name with
+        ``.pdf`` extension.
+    keep_ps:
+        When *True* the intermediate PostScript file is kept alongside
+        the PDF.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated PDF file.
     """
     doo_path = Path(doo_path)
     if not doo_path.is_file():
         raise FileNotFoundError(f"Input file not found: {doo_path}")
 
     if output is None:
-        output = doo_path.with_suffix(".ps")
+        output = doo_path.with_suffix(".pdf")
     else:
         output = Path(output)
 
-    _render_to_ps(str(doo_path), str(output), verbose)
+    _render_and_convert(
+        lambda ps: _render_to_ps(str(doo_path), ps, verbose),
+        output,
+        keep_ps,
+    )
     return output
 
 
@@ -92,29 +180,34 @@ def render_file_up_to_step(
     step: int,
     output: str | Path | None = None,
     *,
+    keep_ps: bool = False,
     verbose: bool = False,
 ) -> Path:
     """Render an existing .doo file up to and including a specific step.
 
     This is the most direct path to the C++ renderer — the .doo file is
     parsed natively, the internal step list is truncated to *step* entries,
-    and ``ps_output`` renders the result.
+    and ``ps_output`` renders the result which is then converted to PDF.
 
     Parameters
     ----------
     doo_path:
-        Path to a .doo input file.
+        Path to a ``.doo`` input file.
     step:
         Render only up to and including this step number (1-based).
         Must be >= 1.
     output:
-        Path for the .ps file. Defaults to the input name with .ps.
+        Path for the ``.pdf`` file.  Defaults to the input name with
+        ``.pdf`` extension.
+    keep_ps:
+        When *True* the intermediate PostScript file is kept alongside
+        the PDF.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated PDF file.
 
     Raises
     ------
@@ -131,11 +224,15 @@ def render_file_up_to_step(
         raise FileNotFoundError(f"Input file not found: {doo_path}")
 
     if output is None:
-        output = doo_path.with_suffix(".ps")
+        output = doo_path.with_suffix(".pdf")
     else:
         output = Path(output)
 
-    _render_step_to_ps(str(doo_path), str(output), step, verbose)
+    _render_and_convert(
+        lambda ps: _render_step_to_ps(str(doo_path), ps, step, verbose),
+        output,
+        keep_ps,
+    )
     return output
 
 
@@ -144,6 +241,7 @@ def render_up_to_step(
     step: int,
     output: str | Path | None = None,
     *,
+    keep_ps: bool = False,
     verbose: bool = False,
 ) -> Path:
     """Render a Diagram up to and including a specific step.
@@ -161,13 +259,16 @@ def render_up_to_step(
         Render only up to and including this step number (1-based).
         Must be >= 1.
     output:
-        Path for the .ps file. If None a temporary file is used.
+        Path for the ``.pdf`` file.  If *None* a temporary file is used.
+    keep_ps:
+        When *True* the intermediate PostScript file is kept alongside
+        the PDF.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated PDF file.
 
     Raises
     ------
@@ -188,11 +289,15 @@ def render_up_to_step(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(".ps")
+            output = doo_path.with_suffix(".pdf")
         else:
             output = Path(output)
 
-        _render_step_to_ps(str(doo_path), str(output), step, verbose)
+        _render_and_convert(
+            lambda ps: _render_step_to_ps(str(doo_path), ps, step, verbose),
+            output,
+            keep_ps,
+        )
         return output
     finally:
         doo_path.unlink(missing_ok=True)
