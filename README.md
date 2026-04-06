@@ -50,19 +50,27 @@ dependencies automatically).
 ### Quick test
 
 ```python
-from pydoodle import render_file
+from pydoodle import render_diagram_to_pdf, Diagram, DiagramHeader, Step, Square, Designer, Title, Caption
 
-ps_path = render_file("examples/simple_boat.doo")
-print(f"Generated {ps_path}")
+diagram = Diagram(
+    header=DiagramHeader(body=[Designer("Traditional"), Title("Simple boat")]),
+    body=[Step(body=[Square("a", "b", "c", "d"), Caption("Start with a square")])],
+)
+pdf_path = render_diagram_to_pdf(diagram)
+print(f"Generated {pdf_path}")
 ```
 
 Or from the command line:
 
 ```bash
-python -c "from pydoodle import render_file; print(render_file('examples/simple_boat.doo'))"
+python -c "
+from pydoodle import render_diagram_to_pdf, Diagram, DiagramHeader, Step, Square, Designer, Title, Caption
+d = Diagram(header=DiagramHeader(body=[Designer('X'), Title('T')]), body=[Step(body=[Square('a','b','c','d')])])
+print(render_diagram_to_pdf(d))
+"
 ```
 
-This should produce a `.ps` (PostScript) file next to the input `.doo` file.
+This should produce a ``.pdf`` file.
 
 ## Examples
 
