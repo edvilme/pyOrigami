@@ -119,6 +119,8 @@ def render_diagram(
                 _ps_to_pdf(ps_path, output)
             finally:
                 ps_path.unlink(missing_ok=True)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
 
         return output
     finally:
@@ -194,6 +196,8 @@ def render_step(
                 _ps_to_pdf(ps_path, output)
             finally:
                 ps_path.unlink(missing_ok=True)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
 
         return output
     finally:
