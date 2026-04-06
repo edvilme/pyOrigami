@@ -93,8 +93,7 @@ def render_diagram(
     -------
     Path to the generated file.
     """
-    fmt = format
-    if not isinstance(fmt, OutputFormat):
+    if not isinstance(format, OutputFormat):
         raise TypeError(
             f"format must be an OutputFormat enum member, got {type(format).__name__}"
         )
@@ -110,11 +109,11 @@ def render_diagram(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(f".{fmt}")
+            output = doo_path.with_suffix(f".{format}")
         else:
             output = Path(output)
 
-        if fmt is OutputFormat.PS:
+        if format is OutputFormat.PS:
             _render_to_ps(str(doo_path), str(output), verbose)
         else:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
@@ -174,8 +173,7 @@ def render_step(
     if step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
 
-    fmt = format
-    if not isinstance(fmt, OutputFormat):
+    if not isinstance(format, OutputFormat):
         raise TypeError(
             f"format must be an OutputFormat enum member, got {type(format).__name__}"
         )
@@ -191,11 +189,11 @@ def render_step(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(f".{fmt}")
+            output = doo_path.with_suffix(f".{format}")
         else:
             output = Path(output)
 
-        if fmt is OutputFormat.PS:
+        if format is OutputFormat.PS:
             _render_step_to_ps(str(doo_path), str(output), step, verbose)
         else:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
