@@ -11,6 +11,10 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 from . import commands as cmd
 from .writer import write
@@ -57,7 +61,11 @@ def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
         )
 
 
-def _render_and_convert(render_fn, output: Path, keep_ps: bool) -> Path:
+def _render_and_convert(
+    render_fn: "Callable[[str], None]",
+    output: Path,
+    keep_ps: bool,
+) -> None:
     """Run a C++ PS render function and convert the result to PDF.
 
     *render_fn* is called with the path to the intermediate ``.ps`` file.
@@ -65,8 +73,9 @@ def _render_and_convert(render_fn, output: Path, keep_ps: bool) -> Path:
     """
     # Use a unique temp path for the intermediate PS to avoid collisions
     # when the caller-supplied output already has a .ps extension.
+    parent = output.parent if output.parent.is_dir() else Path(tempfile.gettempdir())
     with tempfile.NamedTemporaryFile(
-        suffix=".ps", delete=False, dir=output.parent
+        suffix=".ps", delete=False, dir=parent
     ) as tmp:
         ps_path = Path(tmp.name)
 
