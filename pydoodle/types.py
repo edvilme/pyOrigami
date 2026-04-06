@@ -107,6 +107,23 @@ class OutputFormat(Enum):
     def __str__(self) -> str:
         return self.value
 
+    @staticmethod
+    def from_string(value: str) -> "OutputFormat":
+        """Convert a string to an :class:`OutputFormat` member (case-insensitive).
+
+        Raises
+        ------
+        ValueError
+            If *value* does not match any known format.
+        """
+        try:
+            return OutputFormat(value.lower())
+        except ValueError:
+            valid = ", ".join(repr(f.value) for f in OutputFormat)
+            raise ValueError(
+                f"Unsupported format {value!r}; expected one of {valid}"
+            ) from None
+
 
 Limit = int | Edge
 """A fold / line visual-limit parameter.

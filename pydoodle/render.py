@@ -94,13 +94,7 @@ def render_diagram(
     Path to the generated file.
     """
     if isinstance(format, str):
-        try:
-            format = OutputFormat(format.lower())
-        except ValueError:
-            valid = ", ".join(repr(f.value) for f in OutputFormat)
-            raise ValueError(
-                f"Unsupported format {format!r}; expected one of {valid}"
-            ) from None
+        format = OutputFormat.from_string(format)
 
     doo_text = write(diagram)
 
@@ -112,14 +106,11 @@ def render_diagram(
         doo_path = Path(tmp.name)
 
     try:
-        if output is None:
-            output = doo_path.with_suffix(f".{format}")
-        else:
-            output = Path(output)
+        output = doo_path.with_suffix(f".{format}") if output is None else Path(output)
 
         if format is OutputFormat.PS:
             _render_to_ps(str(doo_path), str(output), verbose)
-        else:
+        elif format is OutputFormat.PDF:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
             os.close(fd)
             ps_path = Path(ps_name)
@@ -178,13 +169,7 @@ def render_step(
         raise ValueError(f"step must be >= 1, got {step!r}")
 
     if isinstance(format, str):
-        try:
-            format = OutputFormat(format.lower())
-        except ValueError:
-            valid = ", ".join(repr(f.value) for f in OutputFormat)
-            raise ValueError(
-                f"Unsupported format {format!r}; expected one of {valid}"
-            ) from None
+        format = OutputFormat.from_string(format)
 
     doo_text = write(diagram)
 
@@ -196,14 +181,11 @@ def render_step(
         doo_path = Path(tmp.name)
 
     try:
-        if output is None:
-            output = doo_path.with_suffix(f".{format}")
-        else:
-            output = Path(output)
+        output = doo_path.with_suffix(f".{format}") if output is None else Path(output)
 
         if format is OutputFormat.PS:
             _render_step_to_ps(str(doo_path), str(output), step, verbose)
-        else:
+        elif format is OutputFormat.PDF:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
             os.close(fd)
             ps_path = Path(ps_name)
