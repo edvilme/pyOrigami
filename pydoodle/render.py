@@ -33,7 +33,8 @@ def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
         If Ghostscript (``gs``) is not found on the system or if the
         conversion fails.
     """
-    gs = shutil.which("gs")
+    # Ghostscript is required for PS to PDF conversion.  Look for it in the system PATH.  On Windows, it may be named "gswin64c" or "gswin32c".
+    gs = shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c")
     if gs is None:
         raise RuntimeError(
             "Ghostscript ('gs') is required for PS to PDF conversion but "
