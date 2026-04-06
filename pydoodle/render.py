@@ -87,6 +87,58 @@ def render_file(
     return output
 
 
+def render_file_up_to_step(
+    doo_path: str | Path,
+    step: int,
+    output: str | Path | None = None,
+    *,
+    verbose: bool = False,
+) -> Path:
+    """Render an existing .doo file up to and including a specific step.
+
+    This is the most direct path to the C++ renderer — the .doo file is
+    parsed natively, the internal step list is truncated to *step* entries,
+    and ``ps_output`` renders the result.
+
+    Parameters
+    ----------
+    doo_path:
+        Path to a .doo input file.
+    step:
+        Render only up to and including this step number (1-based).
+        Must be >= 1.
+    output:
+        Path for the .ps file. Defaults to the input name with .ps.
+    verbose:
+        Enable doodle verbose diagnostics on stderr.
+
+    Returns
+    -------
+    Path to the generated PostScript file.
+
+    Raises
+    ------
+    ValueError
+        If *step* is less than 1.
+    FileNotFoundError
+        If *doo_path* does not exist.
+    """
+    if step < 1:
+        raise ValueError(f"step must be >= 1, got {step!r}")
+
+    doo_path = Path(doo_path)
+    if not doo_path.is_file():
+        raise FileNotFoundError(f"Input file not found: {doo_path}")
+
+    if output is None:
+        output = doo_path.with_suffix(".ps")
+    else:
+        output = Path(output)
+
+    _render_step_to_ps(str(doo_path), str(output), step, verbose)
+    return output
+
+
 def render_up_to_step(
     diagram: cmd.Diagram,
     step: int,
