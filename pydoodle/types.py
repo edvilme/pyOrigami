@@ -95,6 +95,19 @@ class PaperFormat(Enum):
         return self.value
 
 
+class OutputFormat(Enum):
+    """Output format for rendered diagrams.
+
+    * ``PS``  — PostScript (native C++ output).
+    * ``PDF`` — PDF (converted from PostScript via Ghostscript).
+    """
+    PS = "ps"
+    PDF = "pdf"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 Limit = int | Edge
 """A fold / line visual-limit parameter.
 
