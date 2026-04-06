@@ -1,8 +1,8 @@
-"""High-level Python API for rendering Doodle diagrams to PDF.
+"""High-level Python API for rendering Doodle diagrams.
 
-The C++ renderer produces PostScript internally.  A private helper
-converts the intermediate ``.ps`` to ``.pdf`` via Ghostscript so the
-public API always returns PDF paths.
+The C++ renderer always produces PostScript first.  When the caller
+requests ``"pdf"`` output a private helper converts the intermediate
+``.ps`` file via Ghostscript.
 """
 
 from __future__ import annotations
@@ -16,6 +16,8 @@ from . import commands as cmd
 from .writer import write
 from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
+
+_SUPPORTED_FORMATS = ("ps", "pdf")
 
 
 # ---------------------------------------------------------------------------
@@ -65,28 +67,37 @@ def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
 # Public API
 # ---------------------------------------------------------------------------
 
-def render_diagram_to_pdf(
+def render_diagram(
     diagram: cmd.Diagram,
+    format: str = "pdf",
     output: str | Path | None = None,
     *,
     verbose: bool = False,
 ) -> Path:
-    """Render a full Diagram to PDF.
+    """Render a full Diagram.
 
     Parameters
     ----------
     diagram:
         A pydoodle ``Diagram`` object.
+    format:
+        Output format – ``"ps"`` for PostScript or ``"pdf"`` for PDF.
     output:
-        Destination path for the ``.pdf`` file.  When *None* a temporary
-        file is created automatically.
+        Destination file path.  When *None* a temporary file is created
+        with the appropriate extension.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PDF file.
+    Path to the generated file.
     """
+    fmt = format.lower()
+    if fmt not in _SUPPORTED_FORMATS:
+        raise ValueError(
+            f"Unsupported format {format!r}; expected one of {_SUPPORTED_FORMATS}"
+        )
+
     doo_text = write(diagram)
 
     with tempfile.NamedTemporaryFile(
@@ -98,25 +109,29 @@ def render_diagram_to_pdf(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(".pdf")
+            output = doo_path.with_suffix(f".{fmt}")
         else:
             output = Path(output)
 
-        ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
-        try:
-            _render_to_ps(str(doo_path), str(ps_path), verbose)
-            _ps_to_pdf(ps_path, output)
-        finally:
-            ps_path.unlink(missing_ok=True)
+        if fmt == "ps":
+            _render_to_ps(str(doo_path), str(output), verbose)
+        else:
+            ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
+            try:
+                _render_to_ps(str(doo_path), str(ps_path), verbose)
+                _ps_to_pdf(ps_path, output)
+            finally:
+                ps_path.unlink(missing_ok=True)
 
         return output
     finally:
         doo_path.unlink(missing_ok=True)
 
 
-def render_step_to_pdf(
+def render_step(
     diagram: cmd.Diagram,
     step: int,
+    format: str = "pdf",
     output: str | Path | None = None,
     *,
     verbose: bool = False,
@@ -135,23 +150,31 @@ def render_step_to_pdf(
     step:
         Render only up to and including this step number (1-based).
         Must be ≥ 1.
+    format:
+        Output format – ``"ps"`` for PostScript or ``"pdf"`` for PDF.
     output:
-        Destination path for the ``.pdf`` file.  When *None* a temporary
-        file is created automatically.
+        Destination file path.  When *None* a temporary file is created
+        with the appropriate extension.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PDF file.
+    Path to the generated file.
 
     Raises
     ------
     ValueError
-        If *step* is less than 1.
+        If *step* is less than 1 or *format* is not supported.
     """
     if step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
+
+    fmt = format.lower()
+    if fmt not in _SUPPORTED_FORMATS:
+        raise ValueError(
+            f"Unsupported format {format!r}; expected one of {_SUPPORTED_FORMATS}"
+        )
 
     doo_text = write(diagram)
 
@@ -164,16 +187,19 @@ def render_step_to_pdf(
 
     try:
         if output is None:
-            output = doo_path.with_suffix(".pdf")
+            output = doo_path.with_suffix(f".{fmt}")
         else:
             output = Path(output)
 
-        ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
-        try:
-            _render_step_to_ps(str(doo_path), str(ps_path), step, verbose)
-            _ps_to_pdf(ps_path, output)
-        finally:
-            ps_path.unlink(missing_ok=True)
+        if fmt == "ps":
+            _render_step_to_ps(str(doo_path), str(output), step, verbose)
+        else:
+            ps_path = Path(tempfile.mkstemp(suffix=".ps")[1])
+            try:
+                _render_step_to_ps(str(doo_path), str(ps_path), step, verbose)
+                _ps_to_pdf(ps_path, output)
+            finally:
+                ps_path.unlink(missing_ok=True)
 
         return output
     finally:

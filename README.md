@@ -50,27 +50,31 @@ dependencies automatically).
 ### Quick test
 
 ```python
-from pydoodle import render_diagram_to_pdf, Diagram, DiagramHeader, Step, Square, Designer, Title, Caption
+from pydoodle import render_diagram, Diagram, DiagramHeader, Step, Square, Designer, Title, Caption
 
 diagram = Diagram(
     header=DiagramHeader(body=[Designer("Traditional"), Title("Simple boat")]),
     body=[Step(body=[Square("a", "b", "c", "d"), Caption("Start with a square")])],
 )
-pdf_path = render_diagram_to_pdf(diagram)
+
+# Render to PDF (default) – requires Ghostscript
+pdf_path = render_diagram(diagram, "pdf", "boat.pdf")
 print(f"Generated {pdf_path}")
+
+# Render to PostScript
+ps_path = render_diagram(diagram, "ps", "boat.ps")
+print(f"Generated {ps_path}")
 ```
 
 Or from the command line:
 
 ```bash
 python -c "
-from pydoodle import render_diagram_to_pdf, Diagram, DiagramHeader, Step, Square, Designer, Title, Caption
+from pydoodle import render_diagram, Diagram, DiagramHeader, Step, Square, Designer, Title
 d = Diagram(header=DiagramHeader(body=[Designer('X'), Title('T')]), body=[Step(body=[Square('a','b','c','d')])])
-print(render_diagram_to_pdf(d))
+print(render_diagram(d, 'ps'))
 "
 ```
-
-This should produce a ``.pdf`` file.
 
 ## Examples
 
