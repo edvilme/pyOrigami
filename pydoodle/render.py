@@ -1,36 +1,102 @@
-"""High-level Python API for rendering Doodle diagrams to PostScript."""
+"""High-level Python API for rendering Doodle diagrams.
+
+The C++ renderer always produces PostScript first.  When the caller
+requests ``OutputFormat.PDF`` output a private helper converts the
+intermediate ``.ps`` file via Ghostscript.
+"""
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
 from . import commands as cmd
+from .types import OutputFormat
 from .writer import write
 from ._doodle import render_to_ps as _render_to_ps
+from ._doodle import render_step_to_ps as _render_step_to_ps
 
 
-def render(
+# ---------------------------------------------------------------------------
+# Private helper – PS → PDF conversion
+# ---------------------------------------------------------------------------
+
+def _ps_to_pdf(ps_path: Path, pdf_path: Path) -> None:
+    """Convert a PostScript file to PDF using Ghostscript.
+
+    Raises
+    ------
+    RuntimeError
+        If Ghostscript (``gs``) is not found on the system or if the
+        conversion fails.
+    """
+    # Ghostscript is required for PS to PDF conversion.  Look for it in the system PATH.  On Windows, it may be named "gswin64c" or "gswin32c".
+    gs = shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c")
+    if gs is None:
+        raise RuntimeError(
+            "Ghostscript ('gs') is required for PS to PDF conversion but "
+            "was not found on this system.  Install it with your package "
+            "manager (e.g. 'apt install ghostscript' or 'brew install "
+            "ghostscript')."
+        )
+
+    result = subprocess.run(
+        [
+            gs,
+            "-dNOPAUSE",
+            "-dBATCH",
+            "-dSAFER",
+            "-sDEVICE=pdfwrite",
+            "-dCompatibilityLevel=1.4",
+            f"-sOutputFile={pdf_path}",
+            str(ps_path),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Ghostscript PS→PDF conversion failed (exit {result.returncode}):\n"
+            f"{result.stderr}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def render_diagram(
     diagram: cmd.Diagram,
+    format: OutputFormat | str = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
 ) -> Path:
-    """Render a Diagram object to PostScript.
+    """Render a full Diagram.
 
     Parameters
     ----------
     diagram:
-        A pydoodle Diagram object.
+        A pydoodle ``Diagram`` object.
+    format:
+        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
+        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
     output:
-        Path for the .ps file. If None a temporary file is used.
+        Destination file path.  When *None* a temporary file is created
+        with the appropriate extension.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated file.
     """
+    if isinstance(format, str):
+        format = OutputFormat.from_string(format)
+
     doo_text = write(diagram)
 
     with tempfile.NamedTemporaryFile(
@@ -41,46 +107,99 @@ def render(
         doo_path = Path(tmp.name)
 
     try:
-        if output is None:
-            output = doo_path.with_suffix(".ps")
-        else:
-            output = Path(output)
+        output = doo_path.with_suffix(f".{format}") if output is None else Path(output)
 
-        _render_to_ps(str(doo_path), str(output), verbose)
+        if format is OutputFormat.PS:
+            _render_to_ps(str(doo_path), str(output), verbose)
+        elif format is OutputFormat.PDF:
+            fd, ps_name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            ps_path = Path(ps_name)
+            try:
+                _render_to_ps(str(doo_path), str(ps_path), verbose)
+                _ps_to_pdf(ps_path, output)
+            finally:
+                ps_path.unlink(missing_ok=True)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
+
         return output
     finally:
         doo_path.unlink(missing_ok=True)
 
 
-def render_file(
-    doo_path: str | Path,
+def render_step(
+    diagram: cmd.Diagram,
+    step: int,
+    format: OutputFormat | str = OutputFormat.PDF,
     output: str | Path | None = None,
     *,
     verbose: bool = False,
 ) -> Path:
-    """Render an existing .doo file to PostScript.
+    """Render a Diagram up to and including a specific step.
+
+    Only the diagram steps numbered 1 through *step* are rendered.
+    Inter-step directives (e.g. ``\\scale``, ``\\rotate``,
+    ``\\turn_over_vertical``) are fully processed by the native parser so
+    the geometry and layout remain correct.
 
     Parameters
     ----------
-    doo_path:
-        Path to a .doo input file.
+    diagram:
+        A pydoodle ``Diagram`` object.
+    step:
+        Render only up to and including this step number (1-based).
+        Must be ≥ 1.
+    format:
+        Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript
+        or ``OutputFormat.PDF`` / ``"pdf"`` for PDF.
     output:
-        Path for the .ps file. Defaults to the input name with .ps.
+        Destination file path.  When *None* a temporary file is created
+        with the appropriate extension.
     verbose:
         Enable doodle verbose diagnostics on stderr.
 
     Returns
     -------
-    Path to the generated PostScript file.
+    Path to the generated file.
+
+    Raises
+    ------
+    ValueError
+        If *step* is less than 1 or *format* is not supported.
     """
-    doo_path = Path(doo_path)
-    if not doo_path.is_file():
-        raise FileNotFoundError(f"Input file not found: {doo_path}")
+    if step < 1:
+        raise ValueError(f"step must be >= 1, got {step!r}")
 
-    if output is None:
-        output = doo_path.with_suffix(".ps")
-    else:
-        output = Path(output)
+    if isinstance(format, str):
+        format = OutputFormat.from_string(format)
 
-    _render_to_ps(str(doo_path), str(output), verbose)
-    return output
+    doo_text = write(diagram)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".doo", delete=False, encoding="utf-8"
+    ) as tmp:
+        tmp.write(doo_text)
+        tmp.write("\n")
+        doo_path = Path(tmp.name)
+
+    try:
+        output = doo_path.with_suffix(f".{format}") if output is None else Path(output)
+
+        if format is OutputFormat.PS:
+            _render_step_to_ps(str(doo_path), str(output), step, verbose)
+        elif format is OutputFormat.PDF:
+            fd, ps_name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            ps_path = Path(ps_name)
+            try:
+                _render_step_to_ps(str(doo_path), str(ps_path), step, verbose)
+                _ps_to_pdf(ps_path, output)
+            finally:
+                ps_path.unlink(missing_ok=True)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
+
+        return output
+    finally:
+        doo_path.unlink(missing_ok=True)

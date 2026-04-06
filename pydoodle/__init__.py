@@ -1,6 +1,6 @@
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which, string_quote
+from .types import ArrowHead, ArrowSide, Color, Edge, Limit, OutputFormat, PaperFormat, Side, Which, string_quote
 from .writer import write, write_file
-from .render import render, render_file
+from .render import render_diagram, render_step
 from .commands import (
     Assign,
     AssignPair,
@@ -80,11 +80,11 @@ from .commands import (
 
 __all__ = [
     # Types
-    "ArrowHead", "ArrowSide", "Color", "Edge", "Limit", "PaperFormat", "Side", "Which",
+    "ArrowHead", "ArrowSide", "Color", "Edge", "Limit", "OutputFormat", "PaperFormat", "Side", "Which",
     # Writer
     "write", "write_file",
     # Render
-    "render", "render_file",
+    "render_diagram", "render_step",
     # Structure
     "Assign", "AssignPair", "Diagram", "DiagramHeader", "Step",
     # Comments

@@ -76,6 +76,37 @@ static void render_to_ps(const std::string &input_path,
     ps_output(output_path.c_str());
 }
 
+static void render_step_to_ps(const std::string &input_path,
+                               const std::string &output_path,
+                               int max_step,
+                               bool verbose_mode) {
+    if (max_step < 1)
+        throw std::invalid_argument("max_step must be >= 1");
+
+    reset_parser_state();
+    verbose   = verbose_mode;
+    file_name = input_path;
+
+    FILE *f = fopen(input_path.c_str(), "r");
+    if (!f)
+        throw std::runtime_error("Cannot open input file: " + input_path);
+
+    yyin = f;
+    yyrestart(f);
+
+    int rc = yyparse();
+    fclose(f);
+
+    if (rc != 0)
+        throw std::runtime_error("Parse error in: " + input_path);
+
+    // Truncate the parsed steps to the requested limit.
+    if (steps.size() > static_cast<size_t>(max_step))
+        steps.resize(static_cast<size_t>(max_step));
+
+    ps_output(output_path.c_str());
+}
+
 PYBIND11_MODULE(_doodle, m) {
     m.doc() = "Native bindings to the Doodle origami diagram renderer";
 
@@ -84,4 +115,11 @@ PYBIND11_MODULE(_doodle, m) {
           py::arg("output_path"),
           py::arg("verbose") = false,
           "Parse a .doo file and render it to PostScript.");
+
+    m.def("render_step_to_ps", &render_step_to_ps,
+          py::arg("input_path"),
+          py::arg("output_path"),
+          py::arg("max_step"),
+          py::arg("verbose") = false,
+          "Parse a .doo file and render only the first max_step steps to PostScript.");
 }
