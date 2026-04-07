@@ -20,6 +20,18 @@ line-length = 120
 select = ["E", "F", "W", "I"]
 exclude = ["generated/", "doodle/", "build/", "dist/"]
 
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+exclude = '''
+/(
+    generated
+  | doodle
+  | build
+  | dist
+)/
+'''
+
 [tool.cibuildwheel]
 build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
 skip = "*-musllinux_*"
