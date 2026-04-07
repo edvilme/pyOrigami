@@ -19,7 +19,6 @@ from .types import OutputFormat
 from .writer import write
 from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
-from ._doodle import render_single_step_to_ps as _render_single_step_to_ps
 
 # ---------------------------------------------------------------------------
 # Converter registry
