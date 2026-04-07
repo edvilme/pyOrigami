@@ -585,9 +585,7 @@ class LineToLine:
             self.arg3.to_doo() if isinstance(self.arg3, Edge) else self.arg3,
         ]
         if self.arg4 is not None:
-            parts.append(
-                self.arg4.to_doo() if isinstance(self.arg4, Edge) else self.arg4
-            )
+            parts.append(self.arg4.to_doo() if isinstance(self.arg4, Edge) else self.arg4)
         return f"\\line_to_line({', '.join(parts)})"
 
 
@@ -724,16 +722,8 @@ class Shift:
     dy: int | float
 
     def to_doo(self) -> str:
-        dx = (
-            str(int(self.dx))
-            if isinstance(self.dx, float) and self.dx == int(self.dx)
-            else str(self.dx)
-        )
-        dy = (
-            str(int(self.dy))
-            if isinstance(self.dy, float) and self.dy == int(self.dy)
-            else str(self.dy)
-        )
+        dx = str(int(self.dx)) if isinstance(self.dx, float) and self.dx == int(self.dx) else str(self.dx)
+        dy = str(int(self.dy)) if isinstance(self.dy, float) and self.dy == int(self.dy) else str(self.dy)
         return f"\\shift({self.vertex}, {dx}, {dy})"
 
 
