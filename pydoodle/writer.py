@@ -1,4 +1,5 @@
 """Serializes pydoodle command trees into Doodle .doo text format."""
+
 from __future__ import annotations
 
 from . import commands as cmd

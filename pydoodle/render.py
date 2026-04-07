@@ -21,7 +21,6 @@ from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
 from ._doodle import render_single_step_to_ps as _render_single_step_to_ps
 
-
 # ---------------------------------------------------------------------------
 # Converter registry
 # ---------------------------------------------------------------------------
@@ -90,13 +89,16 @@ def _ps_to_svg(ps_path: Path, out_path: Path) -> None:
 
 
 _CONVERTERS[OutputFormat.PNG] = partial(_gs_convert, "png16m", ["-r150"])
-_CONVERTERS[OutputFormat.PDF] = partial(_gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"])
+_CONVERTERS[OutputFormat.PDF] = partial(
+    _gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"]
+)
 _CONVERTERS[OutputFormat.SVG] = _ps_to_svg
 
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def render(
     diagram: cmd.Diagram,
