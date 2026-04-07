@@ -20,7 +20,6 @@ from .types import OutputFormat
 from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
 
-
 # ---------------------------------------------------------------------------
 # Write helpers
 # ---------------------------------------------------------------------------
@@ -36,6 +35,7 @@ def write_file(diagram: cmd.Diagram, path: str) -> None:
     with open(path, "w", encoding="utf-8") as f:
         f.write(write(diagram))
         f.write("\n")
+
 
 # ---------------------------------------------------------------------------
 # Converter registry
