@@ -12,6 +12,7 @@ class Edge(NamedTuple):
     defined between them — it is often used simply to designate a line
     passing through two known points.
     """
+
     v1: str
     v2: str
 
@@ -26,6 +27,7 @@ class Side(Enum):
     ``FRONT`` selects the front-side colour and ``BACK`` selects the
     back-side colour, as set by ``\\color_front`` / ``\\color_back``.
     """
+
     FRONT = "front"
     BACK = "back"
 
@@ -43,6 +45,7 @@ class ArrowHead(Enum):
     * ``UNFOLD``   — half-filled head indicating an unfold action.
     * ``NONE``     — no arrow head drawn.
     """
+
     VALLEY = "valley"
     MOUNTAIN = "mountain"
     UNFOLD = "unfold"
@@ -58,6 +61,7 @@ class ArrowSide(Enum):
     Along the arrow direction, the arc or curve can be drawn to the
     ``LEFT`` or ``RIGHT``.  Default is ``RIGHT`` for most operators.
     """
+
     LEFT = "left"
     RIGHT = "right"
 
@@ -72,6 +76,7 @@ class Which(Enum):
     ``FIRST`` keeps the first intersection found; ``SECOND`` keeps the
     other one.  Default is ``FIRST``.
     """
+
     FIRST = "first"
     SECOND = "second"
 
@@ -88,6 +93,7 @@ class PaperFormat(Enum):
     * ``A`` — ISO A-series proportion (1 : √2 ≈ 141%).
     * ``DOLLAR`` — US dollar bill proportion.
     """
+
     A = "A"
     DOLLAR = "dollar"
 
@@ -100,9 +106,14 @@ class OutputFormat(Enum):
 
     * ``PS``  — PostScript (native C++ output).
     * ``PDF`` — PDF (converted from PostScript via Ghostscript).
+    * ``PNG`` — PNG (converted from PostScript via Ghostscript).
+    * ``SVG`` — SVG (converted from PostScript via Ghostscript).
     """
+
     PS = "ps"
     PDF = "pdf"
+    PNG = "png"
+    SVG = "svg"
 
     def __str__(self) -> str:
         return self.value
@@ -150,4 +161,3 @@ def string_quote(s: str) -> str:
     """Wrap *s* in double quotes, escaping characters that would break .doo syntax."""
     s = s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
     return f'"{s}"'
-

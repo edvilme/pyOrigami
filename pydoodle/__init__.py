@@ -1,6 +1,17 @@
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, OutputFormat, PaperFormat, Side, Which, string_quote
+from .types import (
+    ArrowHead,
+    ArrowSide,
+    Color,
+    Edge,
+    Limit,
+    OutputFormat,
+    PaperFormat,
+    Side,
+    Which,
+    string_quote,
+)
 from .writer import write, write_file
-from .render import render_diagram, render_step
+from .render import render
 from .commands import (
     Assign,
     AssignPair,
@@ -80,46 +91,107 @@ from .commands import (
 
 __all__ = [
     # Types
-    "ArrowHead", "ArrowSide", "Color", "Edge", "Limit", "OutputFormat", "PaperFormat", "Side", "Which",
+    "ArrowHead",
+    "ArrowSide",
+    "Color",
+    "Edge",
+    "Limit",
+    "OutputFormat",
+    "PaperFormat",
+    "Side",
+    "Which",
     # Writer
-    "write", "write_file",
+    "write",
+    "write_file",
     # Render
-    "render_diagram", "render_step",
+    "render",
     # Structure
-    "Assign", "AssignPair", "Diagram", "DiagramHeader", "Step",
+    "Assign",
+    "AssignPair",
+    "Diagram",
+    "DiagramHeader",
+    "Step",
     # Comments
     "DooComment",
     # Header
-    "Designer", "Title", "Diagrammer", "DiagramDate", "DesignDate",
-    "Comment", "ColorFront", "ColorBack",
-    "BottomMargin", "TopMargin", "LeftMargin", "RightMargin",
-    "HorizontalSpace", "VerticalSpace",
+    "Designer",
+    "Title",
+    "Diagrammer",
+    "DiagramDate",
+    "DesignDate",
+    "Comment",
+    "ColorFront",
+    "ColorBack",
+    "BottomMargin",
+    "TopMargin",
+    "LeftMargin",
+    "RightMargin",
+    "HorizontalSpace",
+    "VerticalSpace",
     # Paper shapes
-    "Square", "Diamond", "HorizontalRectangle", "VerticalRectangle",
+    "Square",
+    "Diamond",
+    "HorizontalRectangle",
+    "VerticalRectangle",
     # Geometry (return values)
-    "Middle", "Fraction", "Intersection", "InterCut",
-    "PointToPoint", "PointToLine", "LineToLine",
-    "Symmetry", "Parallel", "Perpendicular", "RabbitEar",
+    "Middle",
+    "Fraction",
+    "Intersection",
+    "InterCut",
+    "PointToPoint",
+    "PointToLine",
+    "LineToLine",
+    "Symmetry",
+    "Parallel",
+    "Perpendicular",
+    "RabbitEar",
     # Geometry (no return)
-    "Move", "Shift", "Unshift",
+    "Move",
+    "Shift",
+    "Unshift",
     # Lines / folds
-    "ValleyFold", "MountainFold", "XrayFold", "Fold", "Border", "Cut",
+    "ValleyFold",
+    "MountainFold",
+    "XrayFold",
+    "Fold",
+    "Border",
+    "Cut",
     # Arrows
-    "SimpleArrow", "ReturnArrow", "OpenArrow", "PushArrow", "RepeatArrow",
+    "SimpleArrow",
+    "ReturnArrow",
+    "OpenArrow",
+    "PushArrow",
+    "RepeatArrow",
     # Edge management
-    "Hide", "Show", "SpaceFold",
+    "Hide",
+    "Show",
+    "SpaceFold",
     # Coloring
-    "Fill", "Unfill", "Darker", "Lighter",
+    "Fill",
+    "Unfill",
+    "Darker",
+    "Lighter",
     # Text
-    "Caption", "Label", "Ref", "Text",
+    "Caption",
+    "Label",
+    "Ref",
+    "Text",
     # Layout
-    "Scale", "Rotate", "Clip", "Unclip",
-    "VisibleAreaCenter", "VisibleAreaHeight", "VisibleAreaWidth",
+    "Scale",
+    "Rotate",
+    "Clip",
+    "Unclip",
+    "VisibleAreaCenter",
+    "VisibleAreaHeight",
+    "VisibleAreaWidth",
     # Model manipulation
-    "TurnOverVertical", "TurnOverHorizontal",
+    "TurnOverVertical",
+    "TurnOverHorizontal",
     # Debug
-    "Debug", "DebugLine", "DebugPoint",
+    "Debug",
+    "DebugLine",
+    "DebugPoint",
     # Misc
-    "Reset", "Include",
+    "Reset",
+    "Include",
 ]
-

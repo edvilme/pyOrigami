@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Python interface to the Doodle origami diagram tool"
 requires-python = ">=3.9"
 
+[project.optional-dependencies]
+svg = ["pymupdf>=1.27"]
+
 [tool.setuptools.packages.find]
 include = ["pydoodle*"]
 

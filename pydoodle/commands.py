@@ -2,10 +2,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .types import ArrowHead, ArrowSide, Color, Edge, Limit, PaperFormat, Side, Which, string_quote
-
+from .types import (
+    ArrowHead,
+    ArrowSide,
+    Color,
+    Edge,
+    Limit,
+    PaperFormat,
+    Side,
+    Which,
+    string_quote,
+)
 
 # ── Comments ──────────────────────────────────────────────────────────
+
 
 @dataclass
 class DooComment:
@@ -14,6 +24,7 @@ class DooComment:
     Doodle uses ``%`` as a line-comment character.  Everything after
     ``%`` until the end of the line is ignored by the parser.
     """
+
     text: str = ""
 
     def to_doo(self) -> str:
@@ -24,6 +35,7 @@ class DooComment:
 
 # ── Assignments ───────────────────────────────────────────────────────
 
+
 @dataclass
 class Assign:
     """Single variable assignment, mapping to Doodle's ``name = \\op(...);``.
@@ -33,6 +45,7 @@ class Assign:
 
         Assign("o", Middle("a", "b"))   →   o = \\middle(a, b);
     """
+
     name: str
     expr: object
 
@@ -50,6 +63,7 @@ class AssignPair:
         AssignPair(("i1", "i2"), PointToPoint(...))
         →  [i1, i2] = \\point_to_point(...);
     """
+
     names: tuple[str, str]
     expr: object
 
@@ -60,6 +74,7 @@ class AssignPair:
 
 # ── Structure ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class DiagramHeader:
     """Top-level block containing general diagram information.
@@ -69,6 +84,7 @@ class DiagramHeader:
     and page-layout settings.  All header-specific operators (Designer,
     Title, Diagrammer, etc.) go inside *body*.
     """
+
     body: list = field(default_factory=list)
 
     def to_doo(self, indent: int = 0) -> str:
@@ -94,6 +110,7 @@ class Step:
     previous step become plain fold (crease) lines.  At the end of each
     step an automatic diagram output is produced.
     """
+
     body: list = field(default_factory=list)
 
     def to_doo(self, indent: int = 0) -> str:
@@ -116,6 +133,7 @@ class Diagram:
     a sequence of ``\\step`` blocks interleaved with top-level operators
     such as ``\\scale``, ``\\rotate``, ``\\turn_over_vertical``, etc.
     """
+
     header: DiagramHeader
     body: list = field(default_factory=list)
 
@@ -133,6 +151,7 @@ class Diagram:
 
 # ── Header operators ──────────────────────────────────────────────────
 
+
 @dataclass
 class Designer:
     """Specifies the origami model designer's name.
@@ -140,10 +159,11 @@ class Designer:
     Appears on the first page of the generated diagram.
     Maps to ``\\designer("name");`` inside a ``\\diagram_header`` block.
     """
+
     name: str
 
     def to_doo(self) -> str:
-        return f'\\designer({string_quote(self.name)})'
+        return f"\\designer({string_quote(self.name)})"
 
 
 @dataclass
@@ -153,10 +173,11 @@ class Title:
     Appears centred on the first page of the generated diagram.
     Maps to ``\\title("name");``.
     """
+
     name: str
 
     def to_doo(self) -> str:
-        return f'\\title({string_quote(self.name)})'
+        return f"\\title({string_quote(self.name)})"
 
 
 @dataclass
@@ -165,10 +186,11 @@ class Diagrammer:
 
     Maps to ``\\diagrammer("name");``.
     """
+
     name: str
 
     def to_doo(self) -> str:
-        return f'\\diagrammer({string_quote(self.name)})'
+        return f"\\diagrammer({string_quote(self.name)})"
 
 
 @dataclass
@@ -178,6 +200,7 @@ class DiagramDate:
     The date appears on the first page.
     Maps to ``\\diagram_date(year);``.
     """
+
     year: int
 
     def to_doo(self) -> str:
@@ -190,6 +213,7 @@ class DesignDate:
 
     Maps to ``\\design_date(year);``.
     """
+
     year: int
 
     def to_doo(self) -> str:
@@ -203,10 +227,11 @@ class Comment:
     Multiple ``Comment`` entries are allowed and displayed in order.
     Maps to ``\\comment("text");``.
     """
+
     text: str
 
     def to_doo(self) -> str:
-        return f'\\comment({string_quote(self.text)})'
+        return f"\\comment({string_quote(self.text)})"
 
 
 @dataclass
@@ -216,6 +241,7 @@ class ColorFront:
     Accepts an ``(R, G, B)`` tuple or a named colour string.
     Maps to ``\\color_front(R, G, B);`` or ``\\color_front(name);``.
     """
+
     color: Color
 
     def to_doo(self) -> str:
@@ -232,6 +258,7 @@ class ColorBack:
     Accepts an ``(R, G, B)`` tuple or a named colour string.
     Maps to ``\\color_back(R, G, B);`` or ``\\color_back(name);``.
     """
+
     color: Color
 
     def to_doo(self) -> str:
@@ -247,6 +274,7 @@ class BottomMargin:
 
     Maps to ``\\bottom_margin(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -259,6 +287,7 @@ class TopMargin:
 
     Maps to ``\\top_margin(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -271,6 +300,7 @@ class LeftMargin:
 
     Maps to ``\\left_margin(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -283,6 +313,7 @@ class RightMargin:
 
     Maps to ``\\right_margin(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -295,6 +326,7 @@ class HorizontalSpace:
 
     Maps to ``\\horizontal_space(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -307,6 +339,7 @@ class VerticalSpace:
 
     Maps to ``\\vertical_space(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -314,6 +347,7 @@ class VerticalSpace:
 
 
 # ── Paper shapes ──────────────────────────────────────────────────────
+
 
 @dataclass
 class Square:
@@ -323,6 +357,7 @@ class Square:
     clockwise: upper-right, lower-right, lower-left.
     Maps to ``\\square(v1, v2, v3, v4);``.
     """
+
     v1: str
     v2: str
     v3: str
@@ -340,6 +375,7 @@ class Diamond:
     clockwise: right, bottom, left.  A diamond is a common starting shape.
     Maps to ``\\diamond(v1, v2, v3, v4);``.
     """
+
     v1: str
     v2: str
     v3: str
@@ -358,6 +394,7 @@ class HorizontalRectangle:
     tall) or a named paper format symbol (``"A"``, ``"dollar"``).
     Maps to ``\\horizontal_rectangle(v1, v2, v3, v4, ratio);``.
     """
+
     v1: str
     v2: str
     v3: str
@@ -380,6 +417,7 @@ class VerticalRectangle:
     wide) or a named paper format symbol (``"A"``, ``"dollar"``).
     Maps to ``\\vertical_rectangle(v1, v2, v3, v4, ratio);``.
     """
+
     v1: str
     v2: str
     v3: str
@@ -395,6 +433,7 @@ class VerticalRectangle:
 
 # ── Geometrical operators (produce new vertices) ─────────────────────
 
+
 @dataclass
 class Middle:
     """Creates a new vertex at the midpoint of two existing vertices.
@@ -402,6 +441,7 @@ class Middle:
     The two given vertices need not have a physical edge between them.
     Maps to ``\\middle(v1, v2)``.  Wrap in ``Assign`` to capture the result.
     """
+
     v1: str
     v2: str
 
@@ -419,6 +459,7 @@ class Fraction:
     Maps to ``\\fraction(v1, v2, numerator, denominator)``.  Wrap in
     ``Assign`` to capture the result.
     """
+
     v1: str
     v2: str
     numerator: int
@@ -440,6 +481,7 @@ class Intersection:
     or ``\\intersection(v1, v2, v3, v4)``.  Wrap in ``Assign`` to
     capture the result.
     """
+
     edge1: Edge
     edge2: Edge
 
@@ -461,6 +503,7 @@ class InterCut:
     Maps to ``\\inter_cut(edge1, edge2)``.  Wrap in ``Assign`` to
     capture the result.
     """
+
     edge1: Edge
     edge2: Edge
 
@@ -478,6 +521,7 @@ class PointToPoint:
     Maps to ``\\point_to_point(moving, dest, edge1, edge2)``.  Wrap in
     ``AssignPair`` to capture both results.
     """
+
     moving: str
     dest: str
     edge1: Edge
@@ -498,6 +542,7 @@ class PointToLine:
     Maps to ``\\point_to_line(moving, pivot, limit_edge, edge[, which])``.
     Wrap in ``Assign`` to capture the result.
     """
+
     moving: str
     pivot: str
     limit_edge: Edge
@@ -505,8 +550,7 @@ class PointToLine:
     which: Which = Which.FIRST
 
     def to_doo(self) -> str:
-        args = [self.moving, self.pivot,
-                self.limit_edge.to_doo(), self.edge.to_doo()]
+        args = [self.moving, self.pivot, self.limit_edge.to_doo(), self.edge.to_doo()]
         if self.which != Which.FIRST:
             args.append(str(self.which))
         return f"\\point_to_line({', '.join(args)})"
@@ -528,6 +572,7 @@ class LineToLine:
     or ``\\line_to_line(v1, v2, v3, edge)``.  Wrap in ``AssignPair``
     or ``Assign`` depending on the syntax used.
     """
+
     arg1: Edge | str
     arg2: Edge | str
     arg3: Edge | str
@@ -540,7 +585,9 @@ class LineToLine:
             self.arg3.to_doo() if isinstance(self.arg3, Edge) else self.arg3,
         ]
         if self.arg4 is not None:
-            parts.append(self.arg4.to_doo() if isinstance(self.arg4, Edge) else self.arg4)
+            parts.append(
+                self.arg4.to_doo() if isinstance(self.arg4, Edge) else self.arg4
+            )
         return f"\\line_to_line({', '.join(parts)})"
 
 
@@ -553,6 +600,7 @@ class Symmetry:
     Maps to ``\\symmetry(vertex, edge)``.  Wrap in ``Assign`` to
     capture the result.
     """
+
     vertex: str
     edge: Edge
 
@@ -567,6 +615,7 @@ class Parallel:
     Maps to ``\\parallel(edge, vertex, limit_edge)``.  Wrap in
     ``Assign`` to capture the result.
     """
+
     edge: Edge
     vertex: str
     limit_edge: Edge
@@ -585,6 +634,7 @@ class Perpendicular:
     Maps to ``\\perpendicular(edge, vertex[, limit_edge])``.  Wrap in
     ``Assign`` to capture the result.
     """
+
     edge: Edge
     vertex: str
     limit_edge: Edge | None = None
@@ -616,6 +666,7 @@ class RabbitEar:
     or ``\\rabbit_ear(moving, dest, v3, center[, edge])``.  Wrap in
     ``AssignPair`` or ``Assign`` depending on the syntax used.
     """
+
     moving: str
     dest: str
     v3: str
@@ -634,6 +685,7 @@ class RabbitEar:
 
 # ── Geometrical operators (no return value) ──────────────────────────
 
+
 @dataclass
 class Move:
     """Moves a vertex to a new position.
@@ -647,6 +699,7 @@ class Move:
 
     Maps to ``\\move(src, dest);`` or ``\\move(src, edge);``.
     """
+
     src: str
     dest: str | Edge
 
@@ -665,13 +718,22 @@ class Shift:
     the shifted coordinates to maintain visual consistency.
     Maps to ``\\shift(vertex, dx, dy);``.
     """
+
     vertex: str
     dx: int | float
     dy: int | float
 
     def to_doo(self) -> str:
-        dx = str(int(self.dx)) if isinstance(self.dx, float) and self.dx == int(self.dx) else str(self.dx)
-        dy = str(int(self.dy)) if isinstance(self.dy, float) and self.dy == int(self.dy) else str(self.dy)
+        dx = (
+            str(int(self.dx))
+            if isinstance(self.dx, float) and self.dx == int(self.dx)
+            else str(self.dx)
+        )
+        dy = (
+            str(int(self.dy))
+            if isinstance(self.dy, float) and self.dy == int(self.dy)
+            else str(self.dy)
+        )
         return f"\\shift({self.vertex}, {dx}, {dy})"
 
 
@@ -681,6 +743,7 @@ class Unshift:
 
     Maps to ``\\unshift(vertex);``.
     """
+
     vertex: str
 
     def to_doo(self) -> str:
@@ -688,6 +751,7 @@ class Unshift:
 
 
 # ── Line / fold operators ────────────────────────────────────────────
+
 
 @dataclass
 class ValleyFold:
@@ -702,6 +766,7 @@ class ValleyFold:
     does not already exist between the two vertices.
     Maps to ``\\valley_fold(v1, v2[, limit1, limit2]);``.
     """
+
     v1: str
     v2: str
     limit1: Limit | None = None
@@ -723,6 +788,7 @@ class MountainFold:
     Optional *limit1*/*limit2* control the visible portion of the line.
     Maps to ``\\mountain_fold(v1, v2[, limit1, limit2]);``.
     """
+
     v1: str
     v2: str
     limit1: Limit | None = None
@@ -744,6 +810,7 @@ class XrayFold:
     Optional *limit1*/*limit2* control the visible portion of the line.
     Maps to ``\\xray_fold(v1, v2[, limit1, limit2]);``.
     """
+
     v1: str
     v2: str
     limit1: Limit | None = None
@@ -768,6 +835,7 @@ class Fold:
     Optional *limit1*/*limit2* control the visible portion of the line.
     Maps to ``\\fold(v1, v2[, limit1, limit2]);``.
     """
+
     v1: str
     v2: str
     limit1: Limit | None = None
@@ -790,6 +858,7 @@ class Border:
     intersection edge).
     Maps to ``\\border(v1, v2[, limit1, limit2]);``.
     """
+
     v1: str
     v2: str
     limit1: Limit | None = None
@@ -813,6 +882,7 @@ class Cut:
     together with ``Hide`` to conceal parts of an edge after a fold.
     Maps to ``\\cut(edge, vertex);``.
     """
+
     edge: Edge
     vertex: str
 
@@ -821,6 +891,7 @@ class Cut:
 
 
 # ── Arrow operators ──────────────────────────────────────────────────
+
 
 @dataclass
 class SimpleArrow:
@@ -833,6 +904,7 @@ class SimpleArrow:
     *side* controls whether the arc bows left or right.
     Maps to ``\\simple_arrow(src, dst, src_arrow, dst_arrow[, side[, arc]]);``.
     """
+
     src: str
     dst: str | Edge
     src_arrow: ArrowHead
@@ -842,9 +914,7 @@ class SimpleArrow:
 
     def to_doo(self) -> str:
         d = self.dst.to_doo() if isinstance(self.dst, Edge) else self.dst
-        args = [self.src, d,
-                str(self.src_arrow), str(self.dst_arrow),
-                str(self.side)]
+        args = [self.src, d, str(self.src_arrow), str(self.dst_arrow), str(self.side)]
         if self.arc is not None:
             args.append(str(self.arc))
         return f"\\simple_arrow({', '.join(args)})"
@@ -860,6 +930,7 @@ class ReturnArrow:
     arrow extends beyond *edge2*.
     Maps to ``\\return_arrow(edge1, edge2, src_arrow, dst_arrow[, side[, ratio]]);``.
     """
+
     edge1: Edge
     edge2: Edge
     src_arrow: ArrowHead
@@ -868,9 +939,13 @@ class ReturnArrow:
     ratio: int | None = None
 
     def to_doo(self) -> str:
-        args = [self.edge1.to_doo(), self.edge2.to_doo(),
-                str(self.src_arrow), str(self.dst_arrow),
-                str(self.side)]
+        args = [
+            self.edge1.to_doo(),
+            self.edge2.to_doo(),
+            str(self.src_arrow),
+            str(self.dst_arrow),
+            str(self.side),
+        ]
         if self.ratio is not None:
             args.append(str(self.ratio))
         return f"\\return_arrow({', '.join(args)})"
@@ -884,6 +959,7 @@ class OpenArrow:
     determining left/right side.
     Maps to ``\\open_arrow(edge[, side]);``.
     """
+
     edge: Edge
     side: ArrowSide = ArrowSide.RIGHT
 
@@ -900,6 +976,7 @@ class PushArrow:
     omitted, it is computed to point toward the step centre.
     Maps to ``\\push_arrow(vertex[, angle[, distance]]);``.
     """
+
     vertex: str
     angle: int | None = None
     distance: int | None = None
@@ -924,6 +1001,7 @@ class RepeatArrow:
     Maps to ``\\repeat_arrow(vertex[, number[, angle[, distance]]]);``
     or ``\\repeat_arrow(vertex, label1, label2[, ...]);``.
     """
+
     vertex: str
     number: int | None = None
     label1: str | None = None
@@ -946,6 +1024,7 @@ class RepeatArrow:
 
 # ── Edge management ──────────────────────────────────────────────────
 
+
 @dataclass
 class Hide:
     """Hides previously drawn graphical elements.
@@ -956,6 +1035,7 @@ class Hide:
 
     Maps to ``\\hide(edge);`` or ``\\hide(v1, v2, ...);``.
     """
+
     targets: Edge | list[str]
 
     def to_doo(self) -> str:
@@ -971,6 +1051,7 @@ class Show:
     Accepts the same target forms as ``Hide``.
     Maps to ``\\show(edge);`` or ``\\show(v1, v2, ...);``.
     """
+
     targets: Edge | list[str]
 
     def to_doo(self) -> str:
@@ -987,6 +1068,7 @@ class SpaceFold:
     style changes.
     Maps to ``\\space_fold(edge, pct1, pct2);``.
     """
+
     edge: Edge
     pct1: int
     pct2: int
@@ -997,6 +1079,7 @@ class SpaceFold:
 
 # ── Faces coloring ───────────────────────────────────────────────────
 
+
 @dataclass
 class Fill:
     """Fills a polygonal area with the front or back paper colour.
@@ -1006,6 +1089,7 @@ class Fill:
     areas are drawn in chronological order (first defined, first drawn).
     Maps to ``\\fill(side, v1, v2, ...);``.
     """
+
     side: Side
     vertices: list[str]
 
@@ -1023,6 +1107,7 @@ class Unfill:
     (order-independent) is removed.
     Maps to ``\\unfill(v1, v2, ...);`` or ``\\unfill;``.
     """
+
     vertices: list[str] = field(default_factory=list)
 
     def to_doo(self) -> str:
@@ -1038,6 +1123,7 @@ class Darker:
     *amount* controls the darkening degree.
     Maps to ``\\darker(side, amount);``.
     """
+
     side: Side
     amount: int
 
@@ -1052,6 +1138,7 @@ class Lighter:
     *amount* controls the lightening degree.
     Maps to ``\\lighter(side, amount);``.
     """
+
     side: Side
     amount: int
 
@@ -1061,6 +1148,7 @@ class Lighter:
 
 # ── Text operators ───────────────────────────────────────────────────
 
+
 @dataclass
 class Caption:
     """Adds an explanatory text line beneath the current step.
@@ -1068,10 +1156,11 @@ class Caption:
     Multiple captions per step are stacked in order.
     Maps to ``\\caption("text");``.
     """
+
     text: str
 
     def to_doo(self) -> str:
-        return f'\\caption({string_quote(self.text)})'
+        return f"\\caption({string_quote(self.text)})"
 
 
 @dataclass
@@ -1083,6 +1172,7 @@ class Label:
     table from vertex identifiers.
     Maps to ``\\label(name);``.
     """
+
     name: str
 
     def to_doo(self) -> str:
@@ -1095,6 +1185,7 @@ class Ref:
 
     Maps to ``\\ref(label);``.
     """
+
     step: int
 
     def to_doo(self) -> str:
@@ -1107,14 +1198,16 @@ class Text:
 
     Maps to ``\\text(vertex, "text");``.
     """
+
     vertex: str
     text: str
 
     def to_doo(self) -> str:
-        return f'\\text({self.vertex}, {string_quote(self.text)})'
+        return f"\\text({self.vertex}, {string_quote(self.text)})"
 
 
 # ── Step / page layout ───────────────────────────────────────────────
+
 
 @dataclass
 class Scale:
@@ -1125,6 +1218,7 @@ class Scale:
     Appears **outside** step blocks.
     Maps to ``\\scale(percent);``.
     """
+
     percent: int
 
     def to_doo(self) -> str:
@@ -1138,10 +1232,15 @@ class Rotate:
     Applied globally — must appear **outside** step blocks.
     Maps to ``\\rotate(degrees);``.
     """
+
     degrees: int | float
 
     def to_doo(self) -> str:
-        d = str(int(self.degrees)) if isinstance(self.degrees, float) and self.degrees == int(self.degrees) else str(self.degrees)
+        d = (
+            str(int(self.degrees))
+            if isinstance(self.degrees, float) and self.degrees == int(self.degrees)
+            else str(self.degrees)
+        )
         return f"\\rotate({d})"
 
 
@@ -1175,6 +1274,7 @@ class VisibleAreaCenter:
     middle of the step box.
     Maps to ``\\visible_area_center(vertex);``.
     """
+
     vertex: str
 
     def to_doo(self) -> str:
@@ -1187,6 +1287,7 @@ class VisibleAreaHeight:
 
     Maps to ``\\visible_area_height(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -1199,6 +1300,7 @@ class VisibleAreaWidth:
 
     Maps to ``\\visible_area_width(value);``.
     """
+
     value: int
 
     def to_doo(self) -> str:
@@ -1206,6 +1308,7 @@ class VisibleAreaWidth:
 
 
 # ── Model manipulation ───────────────────────────────────────────────
+
 
 @dataclass
 class TurnOverVertical:
@@ -1234,6 +1337,7 @@ class TurnOverHorizontal:
 
 
 # ── Debugging ────────────────────────────────────────────────────────
+
 
 @dataclass
 class Debug:
@@ -1272,6 +1376,7 @@ class DebugPoint:
 
 # ── Miscellaneous ────────────────────────────────────────────────────
 
+
 @dataclass
 class Reset:
     """Resets all internal data structures to their initial state.
@@ -1289,8 +1394,8 @@ class Include:
 
     Maps to ``\\include("filename");``.
     """
+
     filename: str
 
     def to_doo(self) -> str:
-        return f'\\include({string_quote(self.filename)})'
-
+        return f"\\include({string_quote(self.filename)})"
