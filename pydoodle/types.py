@@ -100,9 +100,13 @@ class OutputFormat(Enum):
 
     * ``PS``  — PostScript (native C++ output).
     * ``PDF`` — PDF (converted from PostScript via Ghostscript).
+    * ``PNG`` — PNG (converted from PostScript via Ghostscript).
+    * ``SVG`` — SVG (converted from PostScript via Ghostscript).
     """
     PS = "ps"
     PDF = "pdf"
+    PNG = "png"
+    SVG = "svg"
 
     def __str__(self) -> str:
         return self.value

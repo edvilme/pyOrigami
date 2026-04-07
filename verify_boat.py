@@ -66,4 +66,4 @@ boat = Diagram(
 
 if __name__ == "__main__":
     print(write(boat))
-    render_diagram(boat, OutputFormat.PDF, "simple_boat.pdf")
+    render(boat, OutputFormat.SVG, "simple_boat.svg")
