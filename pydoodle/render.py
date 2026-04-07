@@ -39,9 +39,7 @@ def _find_gs() -> str:
     return gs
 
 
-def _gs_convert(
-    device: str, extra_args: list[str], ps_path: Path, out_path: Path
-) -> None:
+def _gs_convert(device: str, extra_args: list[str], ps_path: Path, out_path: Path) -> None:
     """Convert a PostScript file using a Ghostscript device."""
     gs = _find_gs()
     result = subprocess.run(
@@ -60,8 +58,7 @@ def _gs_convert(
     )
     if result.returncode != 0:
         raise RuntimeError(
-            f"Ghostscript PS→{device} conversion failed "
-            f"(exit {result.returncode}):\n{result.stderr}"
+            f"Ghostscript PS→{device} conversion failed " f"(exit {result.returncode}):\n{result.stderr}"
         )
 
 
@@ -88,9 +85,7 @@ def _ps_to_svg(ps_path: Path, out_path: Path) -> None:
 
 
 _CONVERTERS[OutputFormat.PNG] = partial(_gs_convert, "png16m", ["-r150"])
-_CONVERTERS[OutputFormat.PDF] = partial(
-    _gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"]
-)
+_CONVERTERS[OutputFormat.PDF] = partial(_gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"])
 _CONVERTERS[OutputFormat.SVG] = _ps_to_svg
 
 
@@ -151,9 +146,7 @@ def render(
 
     doo_text = write(diagram)
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".doo", delete=False, encoding="utf-8"
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".doo", delete=False, encoding="utf-8") as tmp:
         tmp.write(doo_text)
         tmp.write("\n")
         doo_path = Path(tmp.name)

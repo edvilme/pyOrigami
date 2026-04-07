@@ -45,9 +45,7 @@ boat = Diagram(
                 Assign("o", Middle("ad", "bc")),
                 Assign("ab", Middle("a", "b")),
                 ValleyFold("o", "ab"),
-                SimpleArrow(
-                    "a", "b", ArrowHead.VALLEY, ArrowHead.UNFOLD, ArrowSide.RIGHT
-                ),
+                SimpleArrow("a", "b", ArrowHead.VALLEY, ArrowHead.UNFOLD, ArrowSide.RIGHT),
                 Assign("center", Middle("ad", "b")),
                 VisibleAreaCenter("center"),
                 Caption("Fold and unfold in half again"),
@@ -69,9 +67,7 @@ boat = Diagram(
                 ),
                 Assign(
                     "bbc",
-                    PointToLine(
-                        "bc", "o", Edge("o", "ab"), Edge("b", "bc"), Which.SECOND
-                    ),
+                    PointToLine("bc", "o", Edge("o", "ab"), Edge("b", "bc"), Which.SECOND),
                 ),
                 ValleyFold("bbc", "o"),
                 SimpleArrow(

@@ -131,9 +131,7 @@ class OutputFormat(Enum):
             return OutputFormat(value.lower())
         except ValueError:
             valid = ", ".join(repr(f.value) for f in OutputFormat)
-            raise ValueError(
-                f"Unsupported format {value!r}; expected one of {valid}"
-            ) from None
+            raise ValueError(f"Unsupported format {value!r}; expected one of {valid}") from None
 
 
 Limit = int | Edge
