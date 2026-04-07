@@ -1,0 +1,32 @@
+name: Build Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and verify package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build dependencies
+        run: pip install pybind11 setuptools
+
+      - name: Install package (editable, no build isolation)
+        run: pip install --no-build-isolation -e .
+
+      - name: Verify import
+        run: python -c "import pydoodle"
