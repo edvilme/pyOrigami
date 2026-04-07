@@ -14,12 +14,6 @@ svg = ["pymupdf>=1.27"]
 [tool.setuptools.packages.find]
 include = ["pydoodle*"]
 
-[tool.ruff]
-target-version = "py39"
-line-length = 120
-select = ["E", "F", "W", "I"]
-exclude = ["generated/", "doodle/", "build/", "dist/"]
-
 [tool.black]
 line-length = 120
 target-version = ["py39"]
