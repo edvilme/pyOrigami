@@ -5,6 +5,10 @@ __pycache__/
 
 # C extensions
 *.so
+*.pyd
+
+# Stale build artifacts
+pydoodle/
 
 # Distribution / packaging
 .Python

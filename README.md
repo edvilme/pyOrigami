@@ -57,7 +57,7 @@ dependencies automatically).
 ### Quick test
 
 ```python
-from pydoodle import render_file
+from pyorigami import render_file
 
 ps_path = render_file("examples/simple_boat.doo")
 print(f"Generated {ps_path}")
@@ -66,7 +66,7 @@ print(f"Generated {ps_path}")
 Or from the command line:
 
 ```bash
-python -c "from pydoodle import render_file; print(render_file('examples/simple_boat.doo'))"
+python -c "from pyorigami import render_file; print(render_file('examples/simple_boat.doo'))"
 ```
 
 This should produce a `.ps` (PostScript) file next to the input `.doo` file.

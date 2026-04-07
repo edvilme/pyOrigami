@@ -40,13 +40,13 @@ else:
 
 ext_modules = [
     Pybind11Extension(
-        "pydoodle._doodle",
+        "pyorigami._doodle",
         sources=(
             [os.path.join(DOODLE_SRC, f) for f in CPP_SOURCES]
             + [
                 os.path.join(GENERATED, "lex.yy.cpp"),  # Generated lexer
                 os.path.join(GENERATED, "parser.tab.cpp"),  # Generated parser
-                os.path.join("pydoodle", "_bindings.cpp"),  # pybind11 bindings
+                os.path.join("pyorigami", "_bindings.cpp"),  # pybind11 bindings
             ]
         ),
         include_dirs=[DOODLE_SRC, GENERATED],

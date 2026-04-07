@@ -1,6 +1,6 @@
 """Verify DSL ergonomics by modelling simple_boat.doo steps 1-3."""
 
-from pydoodle import *  # noqa: F403
+from pyorigami import *  # noqa: F403
 
 my_color = (60, 85, 60)
 

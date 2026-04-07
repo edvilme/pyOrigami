@@ -10,8 +10,7 @@ from .types import (
     Which,
     string_quote,
 )
-from .writer import write, write_file
-from .render import render
+from .render import write, write_file, render
 from .commands import (
     Assign,
     AssignPair,
