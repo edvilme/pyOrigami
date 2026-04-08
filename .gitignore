@@ -7,9 +7,6 @@ __pycache__/
 *.so
 *.pyd
 
-# Stale build artifacts
-pydoodle/
-
 # Distribution / packaging
 .Python
 build/
