@@ -8,7 +8,8 @@ from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension
 
 DOODLE_SRC = os.path.join("doodle", "src")
-GENERATED = "generated"
+EXT = "ext"
+GENERATED = os.path.join(EXT, "generated")
 
 CPP_SOURCES = [
     "vertex.cpp",
@@ -40,13 +41,13 @@ else:
 
 ext_modules = [
     Pybind11Extension(
-        "pydoodle._doodle",
+        "pyorigami._doodle",
         sources=(
             [os.path.join(DOODLE_SRC, f) for f in CPP_SOURCES]
             + [
                 os.path.join(GENERATED, "lex.yy.cpp"),  # Generated lexer
                 os.path.join(GENERATED, "parser.tab.cpp"),  # Generated parser
-                os.path.join("pydoodle", "_bindings.cpp"),  # pybind11 bindings
+                os.path.join(EXT, "_bindings.cpp"),  # pybind11 bindings
             ]
         ),
         include_dirs=[DOODLE_SRC, GENERATED],

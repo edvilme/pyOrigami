@@ -6,6 +6,15 @@ A Python library for writing `.doo` files used to create origami diagrams. These
 
 pyOrigami lets you programmatically generate `.doo` diagram files that describe origami models — including folds, arrows, captions, and visual styling — which can then be rendered into folding instructions.
 
+## Project structure
+
+```
+pyorigami/           # Python package (types, commands, render)
+ext/                 # C++ pybind11 bindings & generated parser
+doodle/              # Upstream C++ source (git submodule)
+examples/            # Sample .doo files and scripts
+```
+
 ## Credits
 
 The `.doo` file format originates from the [DOODLE](https://doodle.sourceforge.net/) project, a tool for creating origami diagrams.
@@ -57,19 +66,36 @@ dependencies automatically).
 ### Quick test
 
 ```python
-from pydoodle import render_file
+from pyorigami import (
+    Diagram, DiagramHeader, Step,
+    Designer, Title, Diagrammer, DiagramDate,
+    Square, ValleyFold, Middle, Assign,
+    write, render,
+)
 
-ps_path = render_file("examples/simple_boat.doo")
-print(f"Generated {ps_path}")
+boat = Diagram(
+    header=DiagramHeader(body=[
+        Designer("Traditional"),
+        Title("Simple boat"),
+    ]),
+    body=[
+        Step(body=[
+            Square("a", "b", "c", "d"),
+            Assign("m", Middle("a", "d")),
+            Assign("n", Middle("b", "c")),
+            ValleyFold("m", "n"),
+        ]),
+    ],
+)
+
+# Serialize to .doo text
+print(write(boat))
+
+# Render to PDF (requires Ghostscript)
+render(boat, "pdf", "boat.pdf")
 ```
 
-Or from the command line:
-
-```bash
-python -c "from pydoodle import render_file; print(render_file('examples/simple_boat.doo'))"
-```
-
-This should produce a `.ps` (PostScript) file next to the input `.doo` file.
+See [examples/verify_boat.py](examples/verify_boat.py) for a more complete example.
 
 ## Output formats
 
@@ -86,22 +112,22 @@ See the [examples/](examples/) directory for sample `.doo` files.
 
 ## Regenerating parser files
 
-The `generated/` directory contains pre-generated parser files built from
+The `ext/generated/` directory contains pre-generated parser files built from
 `doodle/src/parser.l` (lexer) and `doodle/src/parser.y` (grammar). These only
 need regenerating if the grammar changes. You need `flex` and `bison` installed.
 
 **Windows** (with [WinFlexBison](https://github.com/lexxmark/winflexbison)):
 
 ```powershell
-win_flex -o"generated/lex.yy.cpp" doodle/src/parser.l
-win_bison -t -v -b parser -d -o "generated/parser.tab.cpp" doodle/src/parser.y
+win_flex -o"ext/generated/lex.yy.cpp" doodle/src/parser.l
+win_bison -t -v -b parser -d -o "ext/generated/parser.tab.cpp" doodle/src/parser.y
 ```
 
 **Linux / macOS**:
 
 ```bash
-flex -o generated/lex.yy.cpp doodle/src/parser.l
-bison -t -v -b parser -d -o generated/parser.tab.cpp doodle/src/parser.y
+flex -o ext/generated/lex.yy.cpp doodle/src/parser.l
+bison -t -v -b parser -d -o ext/generated/parser.tab.cpp doodle/src/parser.y
 ```
 
 The `.cpp` extension is required because MSVC compiles `.c` files as C, but the

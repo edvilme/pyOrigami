@@ -12,7 +12,7 @@ requires-python = ">=3.9"
 svg = ["pymupdf>=1.27"]
 
 [tool.setuptools.packages.find]
-include = ["pydoodle*"]
+include = ["pyorigami*"]
 
 [tool.black]
 line-length = 120

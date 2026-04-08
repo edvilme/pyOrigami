@@ -1,7 +1,8 @@
-"""High-level Python API for rendering Doodle diagrams.
+"""Serialization and rendering of pyorigami Diagram trees.
 
-The C++ renderer always produces PostScript first.  Non-PS formats are
-produced by a converter registered in ``_CONVERTERS``.
+``write`` / ``write_file`` convert a Diagram to the textual ``.doo``
+format.  ``render`` goes further and invokes the C++ engine to produce
+PostScript, PDF, PNG or SVG output files.
 """
 
 from __future__ import annotations
@@ -16,9 +17,25 @@ from pathlib import Path
 
 from . import commands as cmd
 from .types import OutputFormat
-from .writer import write
 from ._doodle import render_to_ps as _render_to_ps
 from ._doodle import render_step_to_ps as _render_step_to_ps
+
+# ---------------------------------------------------------------------------
+# Write helpers
+# ---------------------------------------------------------------------------
+
+
+def write(diagram: cmd.Diagram) -> str:
+    """Serialize a ``Diagram`` tree to a Doodle ``.doo`` format string."""
+    return diagram.to_doo()
+
+
+def write_file(diagram: cmd.Diagram, path: str) -> None:
+    """Serialize a ``Diagram`` tree and write it to a file."""
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(write(diagram))
+        f.write("\n")
+
 
 # ---------------------------------------------------------------------------
 # Converter registry
@@ -108,7 +125,7 @@ def render(
     Parameters
     ----------
     diagram:
-        A pydoodle ``Diagram`` object.
+        A pyorigami ``Diagram`` object.
     format:
         Output format – ``OutputFormat.PS`` / ``"ps"`` for PostScript,
         ``OutputFormat.PDF`` / ``"pdf"`` for PDF, ``OutputFormat.PNG`` /
