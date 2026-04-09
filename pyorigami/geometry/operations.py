@@ -16,7 +16,6 @@ from .constants import EPSILON
 from .vector import Vector
 from .vertex import Vertex
 
-
 # ---------------------------------------------------------------------------
 # Basic (no shift) helpers
 # ---------------------------------------------------------------------------
@@ -226,4 +225,3 @@ def is_orthogonal(v1: Vertex, v2: Vertex, v3: Vertex, v4: Vertex) -> bool:
     ps = u1.dot(u2)
     n = u1.norm() * u2.norm()
     return -0.01 * n < ps < 0.01 * n
-

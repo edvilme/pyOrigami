@@ -951,7 +951,9 @@ class Engine:
         end.name = _gen_sym(s, "era")
         s.vertices.append(begin)
         s.vertices.append(end)
-        s.arrows.append(Arrow(begin.get_name(), end.get_name(), item.src_arrow, item.dst_arrow, item.side, False, ratio))
+        s.arrows.append(
+            Arrow(begin.get_name(), end.get_name(), item.src_arrow, item.dst_arrow, item.side, False, ratio)
+        )
 
     def _read_open_arrow(self, item: cmd.OpenArrow) -> None:
         s = self._step
@@ -1006,4 +1008,3 @@ class Engine:
 def evaluate(diagram: cmd.Diagram) -> tuple[ComputedHeader, list[ComputedStep]]:
     """Process a Diagram tree and return ``(header, steps)``."""
     return Engine().evaluate(diagram)
-

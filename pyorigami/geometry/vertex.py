@@ -80,4 +80,3 @@ class Vertex:
         if res < 0:
             res += 2 * math.pi
         return 180 * res / math.pi
-

@@ -838,4 +838,3 @@ def generate_ps(info: ComputedHeader, steps: list[ComputedStep]) -> str:
     content = content.replace("%%Pages: 000", f"%%Pages: {page_id - 1:3d}", 1)
 
     return content
-

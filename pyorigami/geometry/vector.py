@@ -52,4 +52,3 @@ class Vector:
     @staticmethod
     def between(v1: Vertex, v2: Vertex) -> Vector:
         return Vector(v2.x - v1.x, v2.y - v1.y)
-
