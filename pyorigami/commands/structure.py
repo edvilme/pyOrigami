@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from ..parsing import DoodleParseableCommand
+
 
 @dataclass
 class DooComment:

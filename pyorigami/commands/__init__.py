@@ -1,9 +1,12 @@
 """User-facing command dataclasses for the DOODLE diagram language.
 
 Each dataclass maps to a DOODLE operator and can serialize itself back
-to ``.doo`` text via :meth:`to_doo`.  Based on the grammar defined in
-``doodle/src/parser.y`` from the `DOODLE <https://doodle.sourceforge.net/>`_
-project by Olivier Bettens.
+to ``.doo`` text via :meth:`to_doo`.  Classes that inherit from
+:class:`~pyorigami.parsing.Matchable` can also recognise their own
+syntax via :meth:`match` and :meth:`from_doo_args`.
+
+Based on the grammar defined in ``doodle/src/parser.y`` from the
+`DOODLE <https://doodle.sourceforge.net/>`_ project by Olivier Bettens.
 """
 
 from .structure import Assign, AssignPair, Diagram, DiagramHeader, DooComment, Step
@@ -65,6 +68,89 @@ from .layout import (
     VisibleAreaWidth,
 )
 from .misc import Debug, DebugLine, DebugPoint, Include, Reset
+
+from ..parsing import register
+
+# Register all Matchable command classes so match_statement() can find them.
+register(
+    # header
+    Designer,
+    Title,
+    Diagrammer,
+    DiagramDate,
+    DesignDate,
+    Comment,
+    ColorFront,
+    ColorBack,
+    BottomMargin,
+    TopMargin,
+    LeftMargin,
+    RightMargin,
+    HorizontalSpace,
+    VerticalSpace,
+    # paper
+    Square,
+    Diamond,
+    HorizontalRectangle,
+    VerticalRectangle,
+    # constructions
+    Middle,
+    Fraction,
+    Intersection,
+    InterCut,
+    PointToPoint,
+    PointToLine,
+    LineToLine,
+    Symmetry,
+    Parallel,
+    Perpendicular,
+    RabbitEar,
+    # folds
+    ValleyFold,
+    MountainFold,
+    XrayFold,
+    Fold,
+    Border,
+    Cut,
+    # arrows
+    SimpleArrow,
+    ReturnArrow,
+    OpenArrow,
+    PushArrow,
+    RepeatArrow,
+    # display
+    Hide,
+    Show,
+    SpaceFold,
+    Fill,
+    Unfill,
+    Darker,
+    Lighter,
+    Caption,
+    Label,
+    Ref,
+    Text,
+    # layout
+    Scale,
+    Rotate,
+    Clip,
+    Unclip,
+    VisibleAreaCenter,
+    VisibleAreaHeight,
+    VisibleAreaWidth,
+    TurnOverVertical,
+    TurnOverHorizontal,
+    # transforms
+    Move,
+    Shift,
+    Unshift,
+    # misc
+    Debug,
+    DebugLine,
+    DebugPoint,
+    Reset,
+    Include,
+)
 
 __all__ = [
     # structure
