@@ -97,6 +97,17 @@ class PaperFormat(Enum):
     A = "A"
     DOLLAR = "dollar"
 
+    @property
+    def ratio(self) -> int:
+        """Return the aspect-ratio percentage for this paper format."""
+        import math
+
+        if self is PaperFormat.A:
+            return int(math.sqrt(2) * 100)
+        if self is PaperFormat.DOLLAR:
+            return 235
+        raise ValueError(f"Unknown paper format: {self}")
+
     def __str__(self) -> str:
         return self.value
 

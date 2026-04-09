@@ -11,6 +11,8 @@ from .types import (
     string_quote,
 )
 from .render import write, write_file, render
+from .engine import evaluate
+from .ps import generate_ps
 from .commands import (
     Assign,
     AssignPair,
@@ -104,6 +106,9 @@ __all__ = [
     "write_file",
     # Render
     "render",
+    # Pure-Python engine + PS
+    "evaluate",
+    "generate_ps",
     # Structure
     "Assign",
     "AssignPair",

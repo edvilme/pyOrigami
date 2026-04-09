@@ -9,11 +9,39 @@ pyOrigami lets you programmatically generate `.doo` diagram files that describe 
 ## Project structure
 
 ```
-pyorigami/           # Python package (types, commands, render)
-ext/                 # C++ pybind11 bindings & generated parser
-doodle/              # Upstream C++ source (git submodule)
-examples/            # Sample .doo files and scripts
+pyorigami/
+    types.py             # Enums & type aliases (Edge, Side, ArrowHead, …)
+    commands/            # User-facing DSL dataclasses with to_doo() serialization
+        structure.py     #   Diagram, DiagramHeader, Step, Assign, AssignPair
+        header.py        #   Designer, Title, Diagrammer, dates, colours, margins
+        paper.py         #   Square, Diamond, HorizontalRectangle, VerticalRectangle
+        geometry.py      #   Middle, Fraction, Intersection, Symmetry, RabbitEar, …
+        transforms.py    #   Move, Shift, Unshift
+        folds.py         #   ValleyFold, MountainFold, XrayFold, Fold, Border, Cut
+        arrows.py        #   SimpleArrow, ReturnArrow, OpenArrow, PushArrow, RepeatArrow
+        display.py       #   Hide, Show, Fill, Unfill, Caption, Label, Text, …
+        layout.py        #   Scale, Rotate, Clip, VisibleArea*, TurnOver*
+        misc.py          #   Debug, DebugLine, DebugPoint, Reset, Include
+    geometry/            # Internal computed representations (mirrors C++ types)
+        constants.py     #   Numeric constants from global_def.h, to_ps(), is_null()
+        vec2.py          #   Vec2 2D vector helper
+        vertex.py        #   Vertex with geometric operations
+        edge.py          #   EdgeType, InternalEdge
+        arrow.py         #   ArrowType, InternalArrow, TurnType
+        face.py          #   InternalColor, InternalFace
+        symbols.py       #   OpenArrowSymbol, PushArrowSymbol, RepeatArrowSymbol
+        model.py         #   ComputedHeader, ComputedStep
+    engine.py            # Evaluates Diagram → computed geometry
+    ps.py                # Pure-Python PostScript writer
+    render.py            # Orchestration: write .doo, render PS/PDF/PNG/SVG
+ext/                     # C++ pybind11 bindings & generated parser
+doodle/                  # Upstream C++ source (git submodule)
+examples/                # Sample .doo files and scripts
 ```
+
+All public symbols are re-exported through `pyorigami.commands` and
+`pyorigami.geometry` package `__init__` files, so existing imports like
+`from pyorigami import Square, ValleyFold` continue to work unchanged.
 
 ## Credits
 

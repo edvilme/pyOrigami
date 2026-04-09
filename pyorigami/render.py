@@ -1,8 +1,9 @@
 """Serialization and rendering of pyorigami Diagram trees.
 
 ``write`` / ``write_file`` convert a Diagram to the textual ``.doo``
-format.  ``render`` goes further and invokes the C++ engine to produce
-PostScript, PDF, PNG or SVG output files.
+format.  ``render`` goes further and produces PostScript (either via
+the C++ engine or the pure-Python engine) and optionally converts it
+to PDF, PNG or SVG output files.
 """
 
 from __future__ import annotations
@@ -17,8 +18,17 @@ from pathlib import Path
 
 from . import commands as cmd
 from .types import OutputFormat
-from ._doodle import render_to_ps as _render_to_ps
-from ._doodle import render_step_to_ps as _render_step_to_ps
+
+try:
+    from ._doodle import render_to_ps as _render_to_ps
+    from ._doodle import render_step_to_ps as _render_step_to_ps
+
+    _HAS_NATIVE = True
+except ImportError:
+    _HAS_NATIVE = False
+
+from .engine import evaluate as _evaluate
+from .ps import generate_ps as _generate_ps
 
 # ---------------------------------------------------------------------------
 # Write helpers
@@ -107,6 +117,55 @@ _CONVERTERS[OutputFormat.SVG] = _ps_to_svg
 
 
 # ---------------------------------------------------------------------------
+# Pure-Python rendering path
+# ---------------------------------------------------------------------------
+
+
+def _render_native(
+    diagram: cmd.Diagram,
+    format: OutputFormat,
+    output: str | Path | None,
+    *,
+    step: int | None = None,
+) -> Path:
+    """Render using the pure-Python engine + PS writer."""
+    header, steps = _evaluate(diagram)
+    if step is not None:
+        steps = steps[:step]
+    ps_content = _generate_ps(header, steps)
+
+    if format is OutputFormat.PS:
+        if output is None:
+            fd, name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            output = Path(name)
+        else:
+            output = Path(output)
+        output.write_text(ps_content, encoding="utf-8")
+        return output
+
+    # Write PS to temp, then convert
+    fd, ps_name = tempfile.mkstemp(suffix=".ps")
+    os.close(fd)
+    ps_path = Path(ps_name)
+    try:
+        ps_path.write_text(ps_content, encoding="utf-8")
+        if output is None:
+            fd, name = tempfile.mkstemp(suffix=f".{format}")
+            os.close(fd)
+            output = Path(name)
+        else:
+            output = Path(output)
+        if format in _CONVERTERS:
+            _CONVERTERS[format](ps_path, output)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
+        return output
+    finally:
+        ps_path.unlink(missing_ok=True)
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -119,6 +178,7 @@ def render(
     step: int | None = None,
     single_step: int | None = None,
     verbose: bool = False,
+    native: bool | None = None,
 ) -> Path:
     """Render a Diagram to a file.
 
@@ -139,6 +199,10 @@ def render(
         must be ≥ 1)
     verbose:
         Enable doodle verbose diagnostics on stderr.
+    native:
+        When *True* use the pure-Python engine instead of the C++
+        backend.  When *None* (the default) the C++ backend is used if
+        available, otherwise falls back to the pure-Python engine.
 
     Returns
     -------
@@ -154,6 +218,11 @@ def render(
 
     if isinstance(format, str):
         format = OutputFormat.from_string(format)
+
+    use_native = native if native is not None else not _HAS_NATIVE
+
+    if use_native:
+        return _render_native(diagram, format, output, step=step)
 
     def _to_ps(doo: str, ps: str) -> None:
         if step is not None:
