@@ -55,6 +55,7 @@ The `.doo` file format originates from the [DOODLE](https://doodle.sourceforge.n
 - A C++ compiler (MSVC on Windows, gcc/clang on Linux/macOS)
 - [pybind11](https://pybind11.readthedocs.io/) (installed automatically by the build)
 - [Ghostscript](https://ghostscript.com/) (required for PDF, PNG, and SVG output)
+- [PyMuPDF](https://pymupdf.readthedocs.io/) (installed automatically)
 
 ### Clone (with submodules)
 
@@ -79,12 +80,6 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install --no-build-isolation -e .
-```
-
-To enable SVG output, install with the optional `svg` extra:
-
-```bash
-pip install --no-build-isolation -e ".[svg]"
 ```
 
 `--no-build-isolation` lets setuptools use the pybind11 already installed in your
@@ -132,7 +127,7 @@ See [examples/verify_boat.py](examples/verify_boat.py) for a more complete examp
 | PS     | `.ps`     | None (native C++ output)                  |
 | PDF    | `.pdf`    | Ghostscript                               |
 | PNG    | `.png`    | Ghostscript                               |
-| SVG    | `.svg`    | Ghostscript + `pip install ".[svg]"` (PS → PDF → SVG) |
+| SVG    | `.svg`    | Ghostscript (PS → PDF → SVG via PyMuPDF)  |
 
 ## Examples
 
