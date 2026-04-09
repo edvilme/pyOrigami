@@ -97,41 +97,19 @@ class PaperFormat(Enum):
     A = "A"
     DOLLAR = "dollar"
 
-    def __str__(self) -> str:
-        return self.value
+    @property
+    def ratio(self) -> int:
+        """Return the aspect-ratio percentage for this paper format."""
+        import math
 
-
-class OutputFormat(Enum):
-    """Output format for rendered diagrams.
-
-    * ``PS``  — PostScript (native C++ output).
-    * ``PDF`` — PDF (converted from PostScript via Ghostscript).
-    * ``PNG`` — PNG (converted from PostScript via Ghostscript).
-    * ``SVG`` — SVG (converted from PostScript via Ghostscript).
-    """
-
-    PS = "ps"
-    PDF = "pdf"
-    PNG = "png"
-    SVG = "svg"
+        if self is PaperFormat.A:
+            return int(math.sqrt(2) * 100)
+        if self is PaperFormat.DOLLAR:
+            return 235
+        raise ValueError(f"Unknown paper format: {self}")
 
     def __str__(self) -> str:
         return self.value
-
-    @staticmethod
-    def from_string(value: str) -> "OutputFormat":
-        """Convert a string to an :class:`OutputFormat` member (case-insensitive).
-
-        Raises
-        ------
-        ValueError
-            If *value* does not match any known format.
-        """
-        try:
-            return OutputFormat(value.lower())
-        except ValueError:
-            valid = ", ".join(repr(f.value) for f in OutputFormat)
-            raise ValueError(f"Unsupported format {value!r}; expected one of {valid}") from None
 
 
 Limit = int | Edge

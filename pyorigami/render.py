@@ -1,24 +1,30 @@
 """Serialization and rendering of pyorigami Diagram trees.
 
 ``write`` / ``write_file`` convert a Diagram to the textual ``.doo``
-format.  ``render`` goes further and invokes the C++ engine to produce
-PostScript, PDF, PNG or SVG output files.
+format.  ``render`` goes further and produces PostScript (either via
+the C++ engine or the pure-Python engine) and optionally converts it
+to PDF, PNG or SVG output files.
 """
 
 from __future__ import annotations
 
 import os
-import shutil
-import subprocess
 import tempfile
-from collections.abc import Callable
-from functools import partial
 from pathlib import Path
 
 from . import commands as cmd
-from .types import OutputFormat
-from ._doodle import render_to_ps as _render_to_ps
-from ._doodle import render_step_to_ps as _render_step_to_ps
+from .converters import CONVERTERS, OutputFormat
+
+try:
+    from ._doodle import render_to_ps as _render_to_ps
+    from ._doodle import render_step_to_ps as _render_step_to_ps
+
+    _HAS_NATIVE = True
+except ImportError:
+    _HAS_NATIVE = False
+
+from .engine import evaluate as _evaluate
+from .ps import generate_ps as _generate_ps
 
 # ---------------------------------------------------------------------------
 # Write helpers
@@ -38,72 +44,52 @@ def write_file(diagram: cmd.Diagram, path: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Converter registry
+# Pure-Python rendering path
 # ---------------------------------------------------------------------------
 
-_CONVERTERS: dict[OutputFormat, Callable[[Path, Path], None]] = {}
 
+def _render_native(
+    diagram: cmd.Diagram,
+    format: OutputFormat,
+    output: str | Path | None,
+    *,
+    step: int | None = None,
+) -> Path:
+    """Render using the pure-Python engine + PS writer."""
+    header, steps = _evaluate(diagram)
+    if step is not None:
+        steps = steps[:step]
+    ps_content = _generate_ps(header, steps)
 
-def _find_gs() -> str:
-    gs = shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c")
-    if gs is None:
-        raise RuntimeError(
-            "Ghostscript ('gs') is required for PS conversion but "
-            "was not found on this system.  Install it with your package "
-            "manager (e.g. 'apt install ghostscript' or 'brew install "
-            "ghostscript')."
-        )
-    return gs
+    if format is OutputFormat.PS:
+        if output is None:
+            fd, name = tempfile.mkstemp(suffix=".ps")
+            os.close(fd)
+            output = Path(name)
+        else:
+            output = Path(output)
+        output.write_text(ps_content, encoding="utf-8")
+        return output
 
-
-def _gs_convert(device: str, extra_args: list[str], ps_path: Path, out_path: Path) -> None:
-    """Convert a PostScript file using a Ghostscript device."""
-    gs = _find_gs()
-    result = subprocess.run(
-        [
-            gs,
-            "-dNOPAUSE",
-            "-dBATCH",
-            "-dSAFER",
-            f"-sDEVICE={device}",
-            *extra_args,
-            f"-sOutputFile={out_path}",
-            str(ps_path),
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"Ghostscript PS→{device} conversion failed " f"(exit {result.returncode}):\n{result.stderr}"
-        )
-
-
-def _ps_to_svg(ps_path: Path, out_path: Path) -> None:
-    """Convert a PostScript file to SVG via an intermediate PDF.
-
-    Uses Ghostscript for PS→PDF, then PyMuPDF (``pymupdf``) for PDF→SVG.
-    """
-    import pymupdf  # lazy import to avoid hard dependency at module level
-
-    fd, pdf_name = tempfile.mkstemp(suffix=".pdf")
+    # Write PS to temp, then convert
+    fd, ps_name = tempfile.mkstemp(suffix=".ps")
     os.close(fd)
-    pdf_path = Path(pdf_name)
+    ps_path = Path(ps_name)
     try:
-        _CONVERTERS[OutputFormat.PDF](ps_path, pdf_path)
-        doc = pymupdf.open(pdf_path)
-        try:
-            page = doc[0]
-            out_path.write_text(page.get_svg_image(), encoding="utf-8")
-        finally:
-            doc.close()
+        ps_path.write_text(ps_content, encoding="utf-8")
+        if output is None:
+            fd, name = tempfile.mkstemp(suffix=f".{format}")
+            os.close(fd)
+            output = Path(name)
+        else:
+            output = Path(output)
+        if format in CONVERTERS:
+            CONVERTERS[format](ps_path, output)
+        else:
+            raise ValueError(f"Unsupported output format: {format!r}")
+        return output
     finally:
-        pdf_path.unlink(missing_ok=True)
-
-
-_CONVERTERS[OutputFormat.PNG] = partial(_gs_convert, "png16m", ["-r150"])
-_CONVERTERS[OutputFormat.PDF] = partial(_gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"])
-_CONVERTERS[OutputFormat.SVG] = _ps_to_svg
+        ps_path.unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
@@ -117,8 +103,8 @@ def render(
     output: str | Path | None = None,
     *,
     step: int | None = None,
-    single_step: int | None = None,
     verbose: bool = False,
+    native: bool | None = None,
 ) -> Path:
     """Render a Diagram to a file.
 
@@ -139,6 +125,12 @@ def render(
         must be ≥ 1)
     verbose:
         Enable doodle verbose diagnostics on stderr.
+    native:
+        When *True* use the pure-Python engine instead of the C++
+        backend.  When *None* (the default) the C++ backend is used if
+        available, otherwise falls back to the pure-Python engine.
+        When *False* the C++ backend is explicitly requested; a
+        :exc:`RuntimeError` is raised if it is not available.
 
     Returns
     -------
@@ -148,12 +140,25 @@ def render(
     ------
     ValueError
         If *step* is less than 1 or *format* is not supported.
+    RuntimeError
+        If *native* is ``False`` and the C++ backend is not available.
     """
     if step is not None and step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
 
     if isinstance(format, str):
         format = OutputFormat.from_string(format)
+
+    use_native = native if native is not None else not _HAS_NATIVE
+
+    if not use_native and not _HAS_NATIVE:
+        raise RuntimeError(
+            "The C++ backend (_doodle extension) is not available. "
+            "Install it or use native=True to use the pure-Python engine."
+        )
+
+    if use_native:
+        return _render_native(diagram, format, output, step=step)
 
     def _to_ps(doo: str, ps: str) -> None:
         if step is not None:
@@ -173,13 +178,13 @@ def render(
 
         if format is OutputFormat.PS:
             _to_ps(str(doo_path), str(output))
-        elif format in _CONVERTERS:
+        elif format in CONVERTERS:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
             os.close(fd)
             ps_path = Path(ps_name)
             try:
                 _to_ps(str(doo_path), str(ps_path))
-                _CONVERTERS[format](ps_path, output)
+                CONVERTERS[format](ps_path, output)
             finally:
                 ps_path.unlink(missing_ok=True)
         else:
