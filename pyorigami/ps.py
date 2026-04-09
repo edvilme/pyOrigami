@@ -356,11 +356,7 @@ def _write_vertex_coords(out: StringIO, v: Vertex, current_rotate: float, curren
     if v.dx == 0 and v.dy == 0:
         out.write(f"{to_ps(v.x)} cm {to_ps(v.y)} cm ")
     else:
-        out.write(
-            f"{to_ps(v.x)} {to_ps(v.y)} "
-            f"{v.dx} {v.dy} "
-            f"{current_rotate} {current_scale} add_shift "
-        )
+        out.write(f"{to_ps(v.x)} {to_ps(v.y)} " f"{v.dx} {v.dy} " f"{current_rotate} {current_scale} add_shift ")
 
 
 def _compute_vertex_percent(v1: Vertex, v2: Vertex, sp: int) -> Vertex:
@@ -404,10 +400,7 @@ def _write_line_style(out: StringIO, e: InternalEdge, current_scale: float) -> N
         out.write("[] 0 setdash  % set solid line for existing fold\n")
     elif e.type == EdgeType.XRAY:
         out.write(f"{PS_XRAY_WIDTH / current_scale} setlinewidth % set xray width\n")
-        out.write(
-            f"[1 {current_scale} div 2 {current_scale} div] 0 setdash"
-            "  % set dotted line for xray fold\n"
-        )
+        out.write(f"[1 {current_scale} div 2 {current_scale} div] 0 setdash" "  % set dotted line for xray fold\n")
     else:
         out.write(f"{PS_FOLD_WIDTH / current_scale} setlinewidth % set fold width\n")
         out.write("[] 0 setdash  % set solid line for existing fold\n")
@@ -678,9 +671,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: InternalArrow, cr:
         (a2,) = _write_head_simple_arrow(out, t, a2, True, cx, cy, r, headsize)
 
     # Arrow body
-    out.write(
-        f"{to_ps(cx)} cm {to_ps(cy)} cm {to_ps(r)} cm {a1} {a2} arc stroke\n"
-    )
+    out.write(f"{to_ps(cx)} cm {to_ps(cy)} cm {to_ps(r)} cm {a1} {a2} arc stroke\n")
 
 
 # ---------------------------------------------------------------------------
@@ -741,9 +732,7 @@ def _write_return_arrow(out: StringIO, step: ComputedStep, a: InternalArrow, cr:
 # ---------------------------------------------------------------------------
 
 
-def _write_arrow_symbol(
-    out: StringIO, step: ComputedStep, sym, cr: float, cs: float
-) -> None:
+def _write_arrow_symbol(out: StringIO, step: ComputedStep, sym, cr: float, cs: float) -> None:
     if isinstance(sym, OpenArrowSymbol):
         v1 = step.get_vertex(sym.v1)
         v2 = step.get_vertex(sym.v2)
@@ -802,17 +791,9 @@ def _write_caption(out: StringIO, step: ComputedStep, urx: float, ury: float) ->
         "setfont               % Make it the current font\n\n"
     )
     out.write("/hline {0 (Mj) width_height exch pop} def\n")
-    out.write(
-        f"{urx * 2} mm -0.4 mul "
-        f"{-ury} mm interline hline add sub moveto\n"
-        f"({step.index}-) show\n"
-    )
+    out.write(f"{urx * 2} mm -0.4 mul " f"{-ury} mm interline hline add sub moveto\n" f"({step.index}-) show\n")
     for i, caption in enumerate(step.captions, 1):
-        out.write(
-            f"{urx * 2} mm -0.3 mul "
-            f"{-ury} mm interline hline add "
-            f"{i} mul sub moveto\n"
-        )
+        out.write(f"{urx * 2} mm -0.3 mul " f"{-ury} mm interline hline add " f"{i} mul sub moveto\n")
         out.write(f"{_ps_string(caption)} show\n")
 
 
@@ -821,7 +802,16 @@ def _write_caption(out: StringIO, step: ComputedStep, urx: float, ury: float) ->
 # ---------------------------------------------------------------------------
 
 
-def _write_step(out: StringIO, step: ComputedStep, cr_ref: list[float], cs_ref: list[float], urx: float, ury: float, *, with_caption: bool = True) -> None:
+def _write_step(
+    out: StringIO,
+    step: ComputedStep,
+    cr_ref: list[float],
+    cs_ref: list[float],
+    urx: float,
+    ury: float,
+    *,
+    with_caption: bool = True,
+) -> None:
     out.write("gsave % begin figure\n")
 
     cr = cr_ref[0]
@@ -843,8 +833,7 @@ def _write_step(out: StringIO, step: ComputedStep, cr_ref: list[float], cs_ref: 
 
     # Re-centering
     out.write(
-        f"{to_ps(-step.visible_center_x)} cm "
-        f"{to_ps(-step.visible_center_y)} cm translate % recentering the step\n"
+        f"{to_ps(-step.visible_center_x)} cm " f"{to_ps(-step.visible_center_y)} cm translate % recentering the step\n"
     )
 
     # Draw faces
@@ -924,9 +913,7 @@ def _write_first_page_header(out: StringIO, info: ComputedHeader) -> None:
 def _write_page_header(out: StringIO, info: ComputedHeader) -> None:
     out.write("gsave % begin page header\n")
     out.write("/Helvetica-Bold findfont 16 scalefont setfont\n")
-    out.write(
-        f"{info.left_margin} mm {PAGE_HEIGHT - info.top_margin} mm 3 mm add moveto "
-    )
+    out.write(f"{info.left_margin} mm {PAGE_HEIGHT - info.top_margin} mm 3 mm add moveto ")
     out.write(_ps_string(info.title))
     out.write(" show\n")
     out.write("/Helvetica findfont 12 scalefont setfont\n")
@@ -1063,24 +1050,17 @@ def generate_ps(info: ComputedHeader, steps: list[ComputedStep]) -> str:
                     inter_v = (PAGE_HEIGHT - top_margin_min - bottom_margin_min - sum_height) // max(num_line, 1)
                 else:
                     inter_v = v_space
-                y = PAGE_HEIGHT - int(
-                    top_margin_min + max_heights[line] / 2 + current_height + (line + 0.5) * inter_v
-                )
+                y = PAGE_HEIGHT - int(top_margin_min + max_heights[line] / 2 + current_height + (line + 0.5) * inter_v)
                 current_height += max_heights[line]
 
                 for col in range(nb_steps_by_line[line]):
                     if nb_steps_by_line[line] == 1:
                         x = PAGE_WIDTH // 2
                     else:
-                        inter_h = (
-                            PAGE_WIDTH - left_margin_min - right_margin_min - sum_width[line]
-                        ) // (nb_steps_by_line[line] - 1)
-                        x = (
-                            left_margin_min
-                            + current_width
-                            + col * inter_h
-                            + steps[step_id_2_write].clip_width // 2
+                        inter_h = (PAGE_WIDTH - left_margin_min - right_margin_min - sum_width[line]) // (
+                            nb_steps_by_line[line] - 1
                         )
+                        x = left_margin_min + current_width + col * inter_h + steps[step_id_2_write].clip_width // 2
                         current_width += steps[step_id_2_write].clip_width
 
                     out.write("gsave % begin step\n")

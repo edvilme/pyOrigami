@@ -581,7 +581,12 @@ class Engine:
                 # arg1=a, arg2=b, arg3=c (vertex), arg4=[d,e]
                 pass
             # Handle line_to_line(a, b, c, [d,e]) -- bissector form
-            if isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, str) and isinstance(expr.arg4, Edge):
+            if (
+                isinstance(expr.arg1, str)
+                and isinstance(expr.arg2, str)
+                and isinstance(expr.arg3, str)
+                and isinstance(expr.arg4, Edge)
+            ):
                 va = s.get_vertex(expr.arg1)
                 vb = s.get_vertex(expr.arg2)
                 vc = s.get_vertex(expr.arg3)
@@ -617,7 +622,12 @@ class Engine:
 
         elif isinstance(expr, cmd.LineToLine):
             # 4-edge form: median/bisector returning two intersection points
-            if isinstance(expr.arg1, Edge) and isinstance(expr.arg2, Edge) and isinstance(expr.arg3, Edge) and isinstance(expr.arg4, Edge):
+            if (
+                isinstance(expr.arg1, Edge)
+                and isinstance(expr.arg2, Edge)
+                and isinstance(expr.arg3, Edge)
+                and isinstance(expr.arg4, Edge)
+            ):
                 va = s.get_vertex(expr.arg1.v1)
                 vb = s.get_vertex(expr.arg1.v2)
                 vc = s.get_vertex(expr.arg2.v1)
@@ -797,9 +807,7 @@ class Engine:
             else:
                 s.lines.append(InternalEdge(s1, s2, t, True, 2, l1_idx))
 
-    def _read_fold_both(
-        self, s1: str, s2: str, t: EdgeType, sp: int, lim_edge: Edge, *, is_limit_v1: bool
-    ) -> None:
+    def _read_fold_both(self, s1: str, s2: str, t: EdgeType, sp: int, lim_edge: Edge, *, is_limit_v1: bool) -> None:
         s = self._step
         lim_idx = self._search_edge(lim_edge.v1, lim_edge.v2)
         idx = self._search_edge_and_hide_equivalent(s1, s2)
