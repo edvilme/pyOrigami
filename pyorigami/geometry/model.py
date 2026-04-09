@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from enum import Enum
 
 from .constants import (
     BOTTOM_MARGIN,
@@ -24,8 +25,14 @@ from .constants import (
 )
 from .vertex import Vertex
 from .edge import EdgeType, InternalEdge
-from .arrow import Arrow, TurnType
+from .arrow import Arrow
 from .face import InternalColor, Face
+
+
+class TurnType(Enum):
+    NONE = 0
+    VERTICAL = 1
+    HORIZONTAL = 2
 from .symbols import ArrowSymbol
 
 

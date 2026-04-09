@@ -31,10 +31,10 @@ from .constants import (
 from .vec2 import Vec2
 from .vertex import Vertex
 from .edge import EdgeType, InternalEdge
-from .arrow import ArrowSideInternal, ArrowType, Arrow, TurnType
+from .arrow import Arrow
 from .face import InternalColor, Face
 from .symbols import ArrowSymbol, OpenArrowSymbol, PushArrowSymbol, RepeatArrowSymbol
-from .model import ComputedHeader, ComputedStep
+from .model import ComputedHeader, ComputedStep, TurnType
 
 __all__ = [
     # constants
@@ -61,10 +61,7 @@ __all__ = [
     "EdgeType",
     "InternalEdge",
     # arrow
-    "ArrowSideInternal",
-    "ArrowType",
     "Arrow",
-    "TurnType",
     # face
     "InternalColor",
     "Face",
@@ -76,4 +73,5 @@ __all__ = [
     # model
     "ComputedHeader",
     "ComputedStep",
+    "TurnType",
 ]

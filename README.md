@@ -15,7 +15,7 @@ pyorigami/
         structure.py     #   Diagram, DiagramHeader, Step, Assign, AssignPair
         header.py        #   Designer, Title, Diagrammer, dates, colours, margins
         paper.py         #   Square, Diamond, HorizontalRectangle, VerticalRectangle
-        geometry.py      #   Middle, Fraction, Intersection, Symmetry, RabbitEar, …
+        constructions.py #   Middle, Fraction, Intersection, Symmetry, RabbitEar, …
         transforms.py    #   Move, Shift, Unshift
         folds.py         #   ValleyFold, MountainFold, XrayFold, Fold, Border, Cut
         arrows.py        #   SimpleArrow, ReturnArrow, OpenArrow, PushArrow, RepeatArrow
@@ -27,10 +27,10 @@ pyorigami/
         vec2.py          #   Vec2 2D vector helper
         vertex.py        #   Vertex with geometric operations
         edge.py          #   EdgeType, InternalEdge
-        arrow.py         #   ArrowType, InternalArrow, TurnType
-        face.py          #   InternalColor, InternalFace
+        arrow.py         #   Arrow
+        face.py          #   InternalColor, Face
         symbols.py       #   OpenArrowSymbol, PushArrowSymbol, RepeatArrowSymbol
-        model.py         #   ComputedHeader, ComputedStep
+        model.py         #   ComputedHeader, ComputedStep, TurnType
     engine.py            # Evaluates Diagram → computed geometry
     ps.py                # Pure-Python PostScript writer
     render.py            # Orchestration: write .doo, render PS/PDF/PNG/SVG

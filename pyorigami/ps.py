@@ -15,9 +15,8 @@ import math
 import random
 from io import StringIO
 
+from .types import ArrowHead, ArrowSide
 from .geometry import (
-    ArrowSideInternal,
-    ArrowType,
     ComputedHeader,
     ComputedStep,
     EdgeType,
@@ -533,7 +532,7 @@ def _write_face(out: StringIO, step: ComputedStep, f: Face, cr: float, cs: float
 
 def _write_head_simple_arrow(
     out: StringIO,
-    atype: ArrowType,
+    atype: ArrowHead,
     angle: float,
     reverse: bool,
     cx: float,
@@ -555,10 +554,10 @@ def _write_head_simple_arrow(
     hly = headsize * math.cos(ha)
     out.write(f"{angle2} rotate\n")
 
-    if atype == ArrowType.VALLEY:
+    if atype == ArrowHead.VALLEY:
         out.write(f"{to_ps(hrx)} cm {to_ps(hry)} cm moveto\n")
         out.write(f"0 0 lineto {to_ps(hlx)} cm {to_ps(hly)} cm lineto stroke\n")
-    elif atype == ArrowType.UNFOLD:
+    elif atype == ArrowHead.UNFOLD:
         out.write("1 1 1 setrgbcolor\n")
         out.write(f"0 0 moveto {to_ps(hrx)} cm {to_ps(hry)} cm lineto\n")
         out.write(f"{to_ps(hlx)} cm {to_ps(hly)} cm lineto closepath fill\n")
@@ -570,9 +569,9 @@ def _write_head_simple_arrow(
             angle -= dangle
         else:
             angle += dangle
-    elif atype == ArrowType.NONE:
+    elif atype == ArrowHead.NONE:
         pass
-    elif atype == ArrowType.MOUNTAIN:
+    elif atype == ArrowHead.MOUNTAIN:
         if not reverse:
             out.write(f"0 0 moveto {to_ps(hrx)} cm {to_ps(hry)} cm lineto\n")
             out.write(f"{to_ps((hlx + hrx) / 2)} cm {to_ps((hly + hry) / 2)} cm lineto stroke\n")
@@ -591,7 +590,7 @@ def _write_head_return_arrow(
     ux: float,
     uy: float,
     head_size: float,
-    atype: ArrowType,
+    atype: ArrowHead,
     right_side: bool,
 ) -> None:
     out.write("gsave\n")
@@ -605,17 +604,17 @@ def _write_head_return_arrow(
     ply = head_length * math.cos(ha)
     pt = (prx, pry) if right_side else (plx, ply)
 
-    if atype == ArrowType.VALLEY:
+    if atype == ArrowHead.VALLEY:
         out.write(f"{to_ps(prx)} cm {to_ps(pry)} cm moveto\n")
         out.write(f"0 0 lineto {to_ps(plx)} cm {to_ps(ply)} cm lineto stroke\n")
-    elif atype == ArrowType.UNFOLD:
+    elif atype == ArrowHead.UNFOLD:
         out.write("1 1 1 setrgbcolor\n")
         out.write(f"0 0 moveto {to_ps(prx)} cm {to_ps(pry)} cm lineto\n")
         out.write(f"{to_ps(plx)} cm {to_ps(ply)} cm lineto closepath fill\n")
         out.write("0 0 0 setrgbcolor\n")
         out.write(f"0 0 moveto {to_ps(prx)} cm {to_ps(pry)} cm lineto\n")
         out.write(f"{to_ps(plx)} cm {to_ps(ply)} cm lineto closepath stroke\n")
-    elif atype == ArrowType.MOUNTAIN:
+    elif atype == ArrowHead.MOUNTAIN:
         out.write(f"0 0 moveto {to_ps(pt[0])} cm {to_ps(pt[1])} cm lineto\n")
         out.write(f"{to_ps((prx + plx) / 2)} cm {to_ps((pry + ply) / 2)} cm lineto stroke\n")
     # arrowNone: nothing
@@ -648,7 +647,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
     r = d / (2 * math.sin(alpha_r / 2))
 
     v = u.ortho()
-    if a.side == ArrowSideInternal.RIGHT:
+    if a.side == ArrowSide.RIGHT:
         cx = px + r * math.cos(alpha_r / 2) * v.x
         cy = py + r * math.cos(alpha_r / 2) * v.y
     else:
@@ -657,7 +656,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
 
     w = Vec2(v1.x - cx, v1.y - cy)
     a1 = math.atan2(w.y, w.x) * 180 / math.pi
-    if a.side == ArrowSideInternal.RIGHT:
+    if a.side == ArrowSide.RIGHT:
         a2 = a1 + a.shape
     else:
         a2 = a1
@@ -670,16 +669,16 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
     # Arrow heads
     headsize = (ARROWLG) * (a2 - a1) * math.pi * r / (180 * 100)
 
-    if (a.v1_type != ArrowType.NONE and a.side == ArrowSideInternal.RIGHT) or (
-        a.v2_type != ArrowType.NONE and a.side == ArrowSideInternal.LEFT
+    if (a.v1_type != ArrowHead.NONE and a.side == ArrowSide.RIGHT) or (
+        a.v2_type != ArrowHead.NONE and a.side == ArrowSide.LEFT
     ):
-        t = a.v1_type if a.side == ArrowSideInternal.RIGHT else a.v2_type
+        t = a.v1_type if a.side == ArrowSide.RIGHT else a.v2_type
         (a1,) = _write_head_simple_arrow(out, t, a1, False, cx, cy, r, headsize)
 
-    if (a.v2_type != ArrowType.NONE and a.side == ArrowSideInternal.RIGHT) or (
-        a.v1_type != ArrowType.NONE and a.side == ArrowSideInternal.LEFT
+    if (a.v2_type != ArrowHead.NONE and a.side == ArrowSide.RIGHT) or (
+        a.v1_type != ArrowHead.NONE and a.side == ArrowSide.LEFT
     ):
-        t = a.v2_type if a.side == ArrowSideInternal.RIGHT else a.v1_type
+        t = a.v2_type if a.side == ArrowSide.RIGHT else a.v1_type
         (a2,) = _write_head_simple_arrow(out, t, a2, True, cx, cy, r, headsize)
 
     # Arrow body
@@ -697,7 +696,7 @@ def _write_return_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
     be = Vec2.between(begin, end)
     u = be / 10
     v = u.ortho()
-    if a.side == ArrowSideInternal.RIGHT:
+    if a.side == ArrowSide.RIGHT:
         v = Vec2(-v.x, -v.y)
 
     u_prop1 = Vec2(50.0 / (100.0 - a.shape) * u.x, 50.0 / (100.0 - a.shape) * u.y)
@@ -731,7 +730,7 @@ def _write_return_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
     out.write(f"{to_ps(c6.x)} cm {to_ps(c6.y)} cm curveto stroke % return arrow\n")
 
     # Arrow heads
-    right_side = a.side == ArrowSideInternal.RIGHT
+    right_side = a.side == ArrowSide.RIGHT
     be_norm = be.norm()
     bc1 = Vec2.between(begin, c1)
     _write_head_return_arrow(out, begin.x, begin.y, bc1.x, bc1.y, be_norm, a.v1_type, right_side)

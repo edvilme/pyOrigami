@@ -24,7 +24,7 @@ from .header import (
     VerticalSpace,
 )
 from .paper import Diamond, HorizontalRectangle, Square, VerticalRectangle
-from .geometry import (
+from .constructions import (
     Fraction,
     InterCut,
     Intersection,

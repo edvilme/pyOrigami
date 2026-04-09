@@ -23,9 +23,7 @@ from .geometry import (
     RETURN_ARROW_RATIO,
     SIMPLE_ARROW_ANGLE,
     SQUARE_EDGE,
-    ArrowSideInternal,
     ArrowSymbol,
-    ArrowType,
     ComputedHeader,
     ComputedStep,
     EdgeType,
@@ -44,22 +42,6 @@ from .geometry import (
 if TYPE_CHECKING:
     pass
 
-
-# ---------------------------------------------------------------------------
-# Mapping helpers
-# ---------------------------------------------------------------------------
-
-_ARROW_TYPE_MAP = {
-    ArrowHead.VALLEY: ArrowType.VALLEY,
-    ArrowHead.MOUNTAIN: ArrowType.MOUNTAIN,
-    ArrowHead.UNFOLD: ArrowType.UNFOLD,
-    ArrowHead.NONE: ArrowType.NONE,
-}
-
-_ARROW_SIDE_MAP = {
-    ArrowSide.LEFT: ArrowSideInternal.LEFT,
-    ArrowSide.RIGHT: ArrowSideInternal.RIGHT,
-}
 
 def _resolve_color(c, header: ComputedHeader) -> InternalColor:
     """Resolve a Color value (tuple or 'front'/'back') to InternalColor."""
@@ -936,9 +918,6 @@ class Engine:
     def _read_simple_arrow(self, item: cmd.SimpleArrow) -> None:
         s = self._step
         angle, sc = self._angle_scale()
-        v1t = _ARROW_TYPE_MAP[item.src_arrow]
-        v2t = _ARROW_TYPE_MAP[item.dst_arrow]
-        side = _ARROW_SIDE_MAP[item.side]
         arc = item.arc if item.arc is not None else SIMPLE_ARROW_ANGLE
 
         if isinstance(item.dst, Edge):
@@ -949,9 +928,9 @@ class Engine:
             r = v.symmetry(va, vb, angle, sc)
             r.name = _gen_sym(s, v.get_name())
             s.vertices.append(r)
-            s.arrows.append(Arrow(item.src, r.get_name(), v1t, v2t, side, True, arc))
+            s.arrows.append(Arrow(item.src, r.get_name(), item.src_arrow, item.dst_arrow, item.side, True, arc))
         else:
-            s.arrows.append(Arrow(item.src, item.dst, v1t, v2t, side, True, arc))
+            s.arrows.append(Arrow(item.src, item.dst, item.src_arrow, item.dst_arrow, item.side, True, arc))
 
     def _read_return_arrow(self, item: cmd.ReturnArrow) -> None:
         s = self._step
@@ -965,16 +944,13 @@ class Engine:
         end = v1.mediator(v2, v3, v4, angle, sc)
         begin = mid12.middle(end)
 
-        v1t = _ARROW_TYPE_MAP[item.src_arrow]
-        v2t = _ARROW_TYPE_MAP[item.dst_arrow]
-        side = _ARROW_SIDE_MAP[item.side]
         ratio = item.ratio if item.ratio is not None else RETURN_ARROW_RATIO
 
         begin.name = _gen_sym(s, "bra")
         end.name = _gen_sym(s, "era")
         s.vertices.append(begin)
         s.vertices.append(end)
-        s.arrows.append(Arrow(begin.get_name(), end.get_name(), v1t, v2t, side, False, ratio))
+        s.arrows.append(Arrow(begin.get_name(), end.get_name(), item.src_arrow, item.dst_arrow, item.side, False, ratio))
 
     def _read_open_arrow(self, item: cmd.OpenArrow) -> None:
         s = self._step
