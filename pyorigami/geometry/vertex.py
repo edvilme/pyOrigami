@@ -52,8 +52,7 @@ class Vertex:
         n = math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
         return -EPSILON < n < EPSILON
 
-    def __hash__(self) -> int:
-        return id(self)
+    __hash__ = None
 
     def equivalent(self, other: Vertex) -> bool:
         n1 = math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
@@ -72,11 +71,11 @@ class Vertex:
         return Vertex(self.name, new_x, new_y)
 
     def get_angle_from_horizontal(self, v: Vertex, angle: float, scale: float) -> float:
-        self.apply_shift(angle, scale)
-        v.apply_shift(angle, scale)
-        if self == v:
+        a = self.apply_shift(angle, scale)
+        b = v.apply_shift(angle, scale)
+        if a == b:
             return 0.0
-        res = math.atan2(v.y - self.y, v.x - self.x)
+        res = math.atan2(b.y - a.y, b.x - a.x)
         if res < 0:
             res += 2 * math.pi
         return 180 * res / math.pi

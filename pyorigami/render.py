@@ -103,7 +103,6 @@ def render(
     output: str | Path | None = None,
     *,
     step: int | None = None,
-    single_step: int | None = None,
     verbose: bool = False,
     native: bool | None = None,
 ) -> Path:
@@ -130,6 +129,8 @@ def render(
         When *True* use the pure-Python engine instead of the C++
         backend.  When *None* (the default) the C++ backend is used if
         available, otherwise falls back to the pure-Python engine.
+        When *False* the C++ backend is explicitly requested; a
+        :exc:`RuntimeError` is raised if it is not available.
 
     Returns
     -------
@@ -139,6 +140,8 @@ def render(
     ------
     ValueError
         If *step* is less than 1 or *format* is not supported.
+    RuntimeError
+        If *native* is ``False`` and the C++ backend is not available.
     """
     if step is not None and step < 1:
         raise ValueError(f"step must be >= 1, got {step!r}")
@@ -147,6 +150,12 @@ def render(
         format = OutputFormat.from_string(format)
 
     use_native = native if native is not None else not _HAS_NATIVE
+
+    if not use_native and not _HAS_NATIVE:
+        raise RuntimeError(
+            "The C++ backend (_doodle extension) is not available. "
+            "Install it or use native=True to use the pure-Python engine."
+        )
 
     if use_native:
         return _render_native(diagram, format, output, step=step)

@@ -542,18 +542,6 @@ class Engine:
             s.vertices.append(v)
 
         elif isinstance(expr, cmd.LineToLine):
-            # 3-arg form: bisector
-            if isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, str):
-                raise ValueError("LineToLine 3-vertex form must be used with AssignPair or have an edge arg4")
-            elif isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, Edge):
-                # bisector: arg1=common vertex, arg2=vertex, arg3=edge
-                va = s.get_vertex(expr.arg1)
-                vb = s.get_vertex(expr.arg2)
-                if expr.arg4 is None:
-                    raise ValueError("LineToLine bisector form requires arg4 (edge)")
-                # Actually the 5-arg form: \line_to_line(a, b, c, [d,e])
-                # arg1=a, arg2=b, arg3=c (vertex), arg4=[d,e]
-                pass
             # Handle line_to_line(a, b, c, [d,e]) -- bisector form
             if (
                 isinstance(expr.arg1, str)
@@ -570,6 +558,13 @@ class Engine:
                 vr = operations.intersection(va, v_biss, vd, ve, angle, sc)
                 vr.name = a.name
                 s.vertices.append(vr)
+            elif isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, str):
+                raise ValueError("LineToLine 3-vertex form must be used with AssignPair or have an edge arg4")
+            else:
+                raise ValueError(
+                    f"Unsupported LineToLine argument combination in Assign context: "
+                    f"arg1={expr.arg1!r}, arg2={expr.arg2!r}, arg3={expr.arg3!r}, arg4={expr.arg4!r}"
+                )
 
         elif isinstance(expr, cmd.RabbitEar):
             self._read_rabbit_ear_assign(a.name, expr)

@@ -22,7 +22,8 @@ class OutputFormat(Enum):
     * ``PS``  — PostScript (native C++ output).
     * ``PDF`` — PDF (converted from PostScript via Ghostscript).
     * ``PNG`` — PNG (converted from PostScript via Ghostscript).
-    * ``SVG`` — SVG (converted from PostScript via Ghostscript).
+    * ``SVG`` — SVG (converted from PostScript via Ghostscript to PDF,
+      then from PDF via PyMuPDF).
     """
 
     PS = "ps"
