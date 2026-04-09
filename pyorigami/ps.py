@@ -29,8 +29,9 @@ from .geometry import (
     PushArrowSymbol,
     RepeatArrowSymbol,
     TurnType,
-    Vec2,
+    Vector,
     Vertex,
+    operations,
 )
 
 # ---------------------------------------------------------------------------
@@ -98,7 +99,7 @@ def _write_vertex_coords(out: StringIO, v: Vertex, current_rotate: float, curren
 
 
 def _compute_vertex_percent(v1: Vertex, v2: Vertex, sp: int) -> Vertex:
-    vec = Vec2.between(v1, v2)
+    vec = Vector.between(v1, v2)
     norm = vec.norm()
     if norm < 1e-12:
         return v1.copy()
@@ -365,7 +366,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
 
     px = (v1.x + v2.x) / 2
     py = (v1.y + v2.y) / 2
-    u = Vec2.between(v1, v2)
+    u = Vector.between(v1, v2)
     alpha_r = a.shape * math.pi / 180
     d = u.norm()
     if d < 1e-12:
@@ -381,7 +382,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
         cx = px - r * math.cos(alpha_r / 2) * v.x
         cy = py - r * math.cos(alpha_r / 2) * v.y
 
-    w = Vec2(v1.x - cx, v1.y - cy)
+    w = Vector(v1.x - cx, v1.y - cy)
     a1 = math.atan2(w.y, w.x) * 180 / math.pi
     if a.side == ArrowSide.RIGHT:
         a2 = a1 + a.shape
@@ -420,17 +421,17 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
 def _write_return_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, cs: float) -> None:
     begin = step.get_vertex(a.v1).apply_shift(cr, cs * 100.0)
     end = step.get_vertex(a.v2).apply_shift(cr, cs * 100.0)
-    be = Vec2.between(begin, end)
+    be = Vector.between(begin, end)
     u = be / 10
     v = u.ortho()
     if a.side == ArrowSide.RIGHT:
-        v = Vec2(-v.x, -v.y)
+        v = Vector(-v.x, -v.y)
 
-    u_prop1 = Vec2(50.0 / (100.0 - a.shape) * u.x, 50.0 / (100.0 - a.shape) * u.y)
-    u_prop2 = Vec2(a.shape / (100.0 - a.shape) * u.x, a.shape / (100.0 - a.shape) * u.y)
-    v_prop2 = Vec2(a.shape / (100.0 - a.shape) * v.x, a.shape / (100.0 - a.shape) * v.y)
+    u_prop1 = Vector(50.0 / (100.0 - a.shape) * u.x, 50.0 / (100.0 - a.shape) * u.y)
+    u_prop2 = Vector(a.shape / (100.0 - a.shape) * u.x, a.shape / (100.0 - a.shape) * u.y)
+    v_prop2 = Vector(a.shape / (100.0 - a.shape) * v.x, a.shape / (100.0 - a.shape) * v.y)
 
-    def _add(base: Vertex, *vecs: tuple[float, Vec2]) -> Vertex:
+    def _add(base: Vertex, *vecs: tuple[float, Vector]) -> Vertex:
         x, y = base.x, base.y
         for scale, vec in vecs:
             x += scale * vec.x
@@ -459,9 +460,9 @@ def _write_return_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, 
     # Arrow heads
     right_side = a.side == ArrowSide.RIGHT
     be_norm = be.norm()
-    bc1 = Vec2.between(begin, c1)
+    bc1 = Vector.between(begin, c1)
     _write_head_return_arrow(out, begin.x, begin.y, bc1.x, bc1.y, be_norm, a.v1_type, right_side)
-    c6c5 = Vec2.between(c6, c5)
+    c6c5 = Vector.between(c6, c5)
     _write_head_return_arrow(out, c6.x, c6.y, c6c5.x, c6c5.y, be_norm, a.v2_type, not right_side)
 
 
@@ -474,7 +475,7 @@ def _write_arrow_symbol(out: StringIO, step: ComputedStep, sym, cr: float, cs: f
     if isinstance(sym, OpenArrowSymbol):
         v1 = step.get_vertex(sym.v1)
         v2 = step.get_vertex(sym.v2)
-        mid = v1.middle(v2)
+        mid = operations.middle(v1, v2)
         angle = v1.get_angle_from_horizontal(v2, cr, cs * 100.0)
         if sym.right:
             angle -= 90
@@ -837,3 +838,4 @@ def generate_ps(info: ComputedHeader, steps: list[ComputedStep]) -> str:
     content = content.replace("%%Pages: 000", f"%%Pages: {page_id - 1:3d}", 1)
 
     return content
+

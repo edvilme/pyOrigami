@@ -35,8 +35,9 @@ from .geometry import (
     PushArrowSymbol,
     RepeatArrowSymbol,
     TurnType,
-    Vec2,
+    Vector,
     Vertex,
+    operations,
 )
 
 if TYPE_CHECKING:
@@ -459,14 +460,14 @@ class Engine:
         if isinstance(expr, cmd.Middle):
             v1 = s.get_vertex(expr.v1)
             v2 = s.get_vertex(expr.v2)
-            v = v1.middle(v2)
+            v = operations.middle(v1, v2)
             v.name = a.name
             s.vertices.append(v)
 
         elif isinstance(expr, cmd.Fraction):
             v1 = s.get_vertex(expr.v1)
             v2 = s.get_vertex(expr.v2)
-            v = v1.fraction(v2, expr.numerator, expr.denominator)
+            v = operations.fraction(v1, v2, expr.numerator, expr.denominator)
             v.name = a.name
             s.vertices.append(v)
 
@@ -475,7 +476,7 @@ class Engine:
             v2 = s.get_vertex(expr.edge1.v2)
             v3 = s.get_vertex(expr.edge2.v1)
             v4 = s.get_vertex(expr.edge2.v2)
-            v = v1.intersection(v2, v3, v4, angle, sc)
+            v = operations.intersection(v1, v2, v3, v4, angle, sc)
             v.name = a.name
             s.vertices.append(v)
 
@@ -484,7 +485,7 @@ class Engine:
             e1v2 = s.get_vertex(expr.edge1.v2)
             e2v1 = s.get_vertex(expr.edge2.v1)
             e2v2 = s.get_vertex(expr.edge2.v2)
-            v = e1v1.intersection(e1v2, e2v1, e2v2, angle, sc)
+            v = operations.intersection(e1v1, e1v2, e2v1, e2v2, angle, sc)
             v.name = a.name
             s.vertices.append(v)
             self._cut_edge(v, e1v1, e1v2, a.name, expr.edge1.v1, expr.edge1.v2)
@@ -493,7 +494,7 @@ class Engine:
             vo = s.get_vertex(expr.vertex)
             va = s.get_vertex(expr.edge.v1)
             vb = s.get_vertex(expr.edge.v2)
-            vr = vo.symmetry(va, vb, angle, sc)
+            vr = operations.symmetry(vo, va, vb, angle, sc)
             vr.name = a.name
             s.vertices.append(vr)
 
@@ -504,15 +505,15 @@ class Engine:
             if expr.limit_edge is not None:
                 v3 = s.get_vertex(expr.limit_edge.v1)
                 v4 = s.get_vertex(expr.limit_edge.v2)
-                p = vo.projection(v1, v2)
+                p = operations.projection(vo, v1, v2)
                 if p == vo:
-                    u = Vec2.between(v1, v2).ortho()
+                    u = Vector.between(v1, v2).ortho()
                     auxi = Vertex("null", vo.x + u.x, vo.y + u.y)
-                    vr = p.intersection(auxi, v3, v4, angle, sc)
+                    vr = operations.intersection(p, auxi, v3, v4, angle, sc)
                 else:
-                    vr = p.intersection(vo, v3, v4, angle, sc)
+                    vr = operations.intersection(p, vo, v3, v4, angle, sc)
             else:
-                vr = vo.projection(v1, v2)
+                vr = operations.projection(vo, v1, v2)
             vr.name = a.name
             s.vertices.append(vr)
 
@@ -522,9 +523,9 @@ class Engine:
             v2 = s.get_vertex(expr.edge.v2)
             v3 = s.get_vertex(expr.limit_edge.v1)
             v4 = s.get_vertex(expr.limit_edge.v2)
-            u = Vec2.between(v1, v2)
+            u = Vector.between(v1, v2)
             p = Vertex("null", vo.x + u.x, vo.y + u.y)
-            vr = p.intersection(vo, v3, v4, angle, sc)
+            vr = operations.intersection(p, vo, v3, v4, angle, sc)
             vr.name = a.name
             s.vertices.append(vr)
 
@@ -536,7 +537,7 @@ class Engine:
             vc = s.get_vertex(expr.edge.v1)
             vd = s.get_vertex(expr.edge.v2)
             first = expr.which == Which.FIRST
-            v = mv.vertex_to_line(pvt, va, vb, vc, vd, first, angle, sc)
+            v = operations.vertex_to_line(mv, pvt, va, vb, vc, vd, first, angle, sc)
             v.name = a.name
             s.vertices.append(v)
 
@@ -565,8 +566,8 @@ class Engine:
                 vc = s.get_vertex(expr.arg3)
                 vd = s.get_vertex(expr.arg4.v1)
                 ve = s.get_vertex(expr.arg4.v2)
-                v_biss = va.bisector(vb, vc, angle, sc)
-                vr = va.intersection(v_biss, vd, ve, angle, sc)
+                v_biss = operations.bisector(va, vb, vc, angle, sc)
+                vr = operations.intersection(va, v_biss, vd, ve, angle, sc)
                 vr.name = a.name
                 s.vertices.append(vr)
 
@@ -586,8 +587,8 @@ class Engine:
             vb = s.get_vertex(expr.edge1.v2)
             vc = s.get_vertex(expr.edge2.v1)
             vd = s.get_vertex(expr.edge2.v2)
-            v1 = vsrc.mediator(vdst, va, vb, angle, sc)
-            v2 = vsrc.mediator(vdst, vc, vd, angle, sc)
+            v1 = operations.mediator(vsrc, vdst, va, vb, angle, sc)
+            v2 = operations.mediator(vsrc, vdst, vc, vd, angle, sc)
             v1.name = n1
             v2.name = n2
             s.vertices.append(v1)
@@ -610,17 +611,17 @@ class Engine:
                 vg = s.get_vertex(expr.arg4.v1)
                 vh = s.get_vertex(expr.arg4.v2)
 
-                if va.is_parallel(vb, vc, vd):
-                    pa = va.projection(vc, vd)
-                    v1 = va.mediator(pa, ve, vf, angle, sc)
-                    v2 = va.mediator(pa, vg, vh, angle, sc)
+                if operations.is_parallel(va, vb, vc, vd):
+                    pa = operations.projection(va, vc, vd)
+                    v1 = operations.mediator(va, pa, ve, vf, angle, sc)
+                    v2 = operations.mediator(va, pa, vg, vh, angle, sc)
                 else:
-                    in_v = va.intersection(vb, vc, vd, angle, sc)
+                    in_v = operations.intersection(va, vb, vc, vd, angle, sc)
                     va1 = vb if in_v == va else va
                     vc1 = vd if in_v == vc else vc
-                    v0 = in_v.bisector(va1, vc1, angle, sc)
-                    v1 = in_v.intersection(v0, ve, vf, angle, sc)
-                    v2 = in_v.intersection(v0, vg, vh, angle, sc)
+                    v0 = operations.bisector(in_v, va1, vc1, angle, sc)
+                    v1 = operations.intersection(in_v, v0, ve, vf, angle, sc)
+                    v2 = operations.intersection(in_v, v0, vg, vh, angle, sc)
 
                 v1.name = n1
                 v2.name = n2
@@ -651,14 +652,14 @@ class Engine:
         if isinstance(expr.center_or_edge, str):
             center = s.get_vertex(expr.center_or_edge)
             # Goofy rabbit ear with given center
-            a1 = v1.symmetry(v2, center, angle, sc)
-            b1 = v2.intersection(center, v1, v3, angle, sc)
-            a2 = a1.symmetry(v3, center, angle, sc)
-            b2 = b1.symmetry(v3, center, angle, sc)
-            a3 = a2.symmetry(b2, center, angle, sc)
-            a4 = a1.mediator(a3, v2, v3, angle, sc)
-            a5 = a4.symmetry(v2, center, angle, sc)
-            v = a5.intersection(center, e1, e2, angle, sc)
+            a1 = operations.symmetry(v1, v2, center, angle, sc)
+            b1 = operations.intersection(v2, center, v1, v3, angle, sc)
+            a2 = operations.symmetry(a1, v3, center, angle, sc)
+            b2 = operations.symmetry(b1, v3, center, angle, sc)
+            a3 = operations.symmetry(a2, b2, center, angle, sc)
+            a4 = operations.mediator(a1, a3, v2, v3, angle, sc)
+            a5 = operations.symmetry(a4, v2, center, angle, sc)
+            v = operations.intersection(a5, center, e1, e2, angle, sc)
             v.name = name
             s.vertices.append(v)
         elif isinstance(expr.center_or_edge, Edge):
@@ -666,11 +667,11 @@ class Engine:
             e1 = s.get_vertex(expr.center_or_edge.v1)
             e2 = s.get_vertex(expr.center_or_edge.v2)
             # Compute center from bisectors
-            p = v1.bisector(v2, v3, angle, sc)
-            q = v2.bisector(v1, v3, angle, sc)
-            center = v1.intersection(p, v2, q, angle, sc)
-            temp = center.projection(v1, v2)
-            v = center.intersection(temp, e1, e2, angle, sc)
+            p = operations.bisector(v1, v2, v3, angle, sc)
+            q = operations.bisector(v2, v1, v3, angle, sc)
+            center = operations.intersection(v1, p, v2, q, angle, sc)
+            temp = operations.projection(center, v1, v2)
+            v = operations.intersection(center, temp, e1, e2, angle, sc)
             v.name = name
             s.vertices.append(v)
 
@@ -689,12 +690,12 @@ class Engine:
             e1 = v1.copy()
             e2 = v2.copy()
 
-        p = v1.bisector(v2, v3, angle, sc)
-        q = v2.bisector(v1, v3, angle, sc)
-        center = v1.intersection(p, v2, q, angle, sc)
+        p = operations.bisector(v1, v2, v3, angle, sc)
+        q = operations.bisector(v2, v1, v3, angle, sc)
+        center = operations.intersection(v1, p, v2, q, angle, sc)
 
-        temp = center.projection(v1, v2)
-        v = center.intersection(temp, e1, e2, angle, sc)
+        temp = operations.projection(center, v1, v2)
+        v = operations.intersection(center, temp, e1, e2, angle, sc)
 
         center.name = n1
         v.name = n2
@@ -804,9 +805,9 @@ class Engine:
 
     def _cut_edge(self, v: Vertex, v1: Vertex, v2: Vertex, sname: str, s1: str, s2: str) -> None:
         s = self._step
-        norm_total = Vec2.between(v1, v2).norm()
-        norm1 = Vec2.between(v1, v).norm()
-        norm2 = Vec2.between(v, v2).norm()
+        norm_total = Vector.between(v1, v2).norm()
+        norm1 = Vector.between(v1, v).norm()
+        norm2 = Vector.between(v, v2).norm()
 
         for i, e in enumerate(s.lines):
             if e.equal(s1, s2):
@@ -901,7 +902,7 @@ class Engine:
             v1 = s.get_vertex(item.dest.v1)
             v2 = s.get_vertex(item.dest.v2)
             angle, sc = self._angle_scale()
-            sym = vsrc.symmetry(v1, v2, angle, sc)
+            sym = operations.symmetry(vsrc, v1, v2, angle, sc)
             vsrc.x = sym.x
             vsrc.y = sym.y
             vsrc.dx = 0.0
@@ -925,7 +926,7 @@ class Engine:
             v = s.get_vertex(item.src)
             va = s.get_vertex(item.dst.v1)
             vb = s.get_vertex(item.dst.v2)
-            r = v.symmetry(va, vb, angle, sc)
+            r = operations.symmetry(v, va, vb, angle, sc)
             r.name = _gen_sym(s, v.get_name())
             s.vertices.append(r)
             s.arrows.append(Arrow(item.src, r.get_name(), item.src_arrow, item.dst_arrow, item.side, True, arc))
@@ -940,9 +941,9 @@ class Engine:
         v3 = s.get_vertex(item.edge2.v1)
         v4 = s.get_vertex(item.edge2.v2)
 
-        mid12 = v1.middle(v2)
-        end = v1.mediator(v2, v3, v4, angle, sc)
-        begin = mid12.middle(end)
+        mid12 = operations.middle(v1, v2)
+        end = operations.mediator(v1, v2, v3, v4, angle, sc)
+        begin = operations.middle(mid12, end)
 
         ratio = item.ratio if item.ratio is not None else RETURN_ARROW_RATIO
 
@@ -1005,3 +1006,4 @@ class Engine:
 def evaluate(diagram: cmd.Diagram) -> tuple[ComputedHeader, list[ComputedStep]]:
     """Process a Diagram tree and return ``(header, steps)``."""
     return Engine().evaluate(diagram)
+

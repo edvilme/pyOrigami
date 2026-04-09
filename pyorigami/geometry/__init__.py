@@ -28,8 +28,9 @@ from .constants import (
     VSPACE,
     is_null,
 )
-from .vec2 import Vec2
+from .vector import Vector
 from .vertex import Vertex
+from . import operations
 from .edge import EdgeType, InternalEdge
 from .arrow import Arrow
 from .face import InternalColor, Face
@@ -54,9 +55,11 @@ __all__ = [
     "VSPACE",
     "is_null",
     # vec2
-    "Vec2",
+    "Vector",
     # vertex
     "Vertex",
+    # operations
+    "operations",
     # edge
     "EdgeType",
     "InternalEdge",
@@ -75,3 +78,4 @@ __all__ = [
     "ComputedStep",
     "TurnType",
 ]
+

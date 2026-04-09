@@ -24,7 +24,7 @@ pyorigami/
         misc.py          #   Debug, DebugLine, DebugPoint, Reset, Include
     geometry/            # Internal computed representations (mirrors C++ types)
         constants.py     #   Numeric constants from global_def.h, to_ps(), is_null()
-        vec2.py          #   Vec2 2D vector helper
+        vector.py        #   Vector 2D vector helper
         vertex.py        #   Vertex with geometric operations
         edge.py          #   EdgeType, InternalEdge
         arrow.py         #   Arrow
