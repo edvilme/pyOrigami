@@ -1,3 +1,10 @@
+"""Arrow symbol dataclasses ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/open_arrow.h``, ``push_arrow.h``, and
+``repeat_arrow.h``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

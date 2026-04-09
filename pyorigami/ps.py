@@ -3,6 +3,10 @@
 Generates PostScript output matching the C++ ``ps_output.cpp`` and
 ``ps_prologue.cpp``, operating entirely on the computed geometry
 produced by :func:`pyorigami.engine.evaluate`.
+
+Derived from ``doodle/src/ps_output.cpp`` and ``doodle/src/ps_prologue.cpp``
+in the `DOODLE <https://doodle.sourceforge.net/>`_ project by
+Olivier Bettens.
 """
 
 from __future__ import annotations

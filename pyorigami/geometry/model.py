@@ -1,3 +1,10 @@
+"""Computed header and step model ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/step.h`` / ``step.cpp`` and
+``doodle/src/diag_header.h`` / ``diag_header.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 import math

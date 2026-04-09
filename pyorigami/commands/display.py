@@ -1,3 +1,9 @@
+"""Display commands (hide, show, fill, caption, label, text, etc.).
+
+Based on the `DOODLE <https://doodle.sourceforge.net/>`_ project by
+Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

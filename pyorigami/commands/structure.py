@@ -1,3 +1,9 @@
+"""Core structural commands for DOODLE diagrams.
+
+Based on the `DOODLE <https://doodle.sourceforge.net/>`_ project by
+Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

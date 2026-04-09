@@ -1,3 +1,9 @@
+"""Vertex dataclass with geometric operations ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/vertex.h`` / ``vertex.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 import math

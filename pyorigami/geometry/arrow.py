@@ -1,3 +1,9 @@
+"""Internal arrow representation ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/arrow.h`` / ``arrow.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

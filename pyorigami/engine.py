@@ -4,6 +4,9 @@ Walks the ``Diagram`` dataclass tree produced by the user and executes
 every geometric operation, building up a list of ``ComputedStep`` objects
 that contain fully resolved vertex positions, edges, arrows, and faces
 ready for PostScript rendering.
+
+Derived from ``doodle/src/read_instruction.cpp`` in the
+`DOODLE <https://doodle.sourceforge.net/>`_ project by Olivier Bettens.
 """
 
 from __future__ import annotations

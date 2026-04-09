@@ -1,3 +1,9 @@
+"""Internal edge representation ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/edge.h`` / ``edge.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

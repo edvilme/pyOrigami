@@ -1,3 +1,11 @@
+"""User-facing command dataclasses for the DOODLE diagram language.
+
+Each dataclass maps to a DOODLE operator and can serialize itself back
+to ``.doo`` text via :meth:`to_doo`.  Based on the grammar defined in
+``doodle/src/parser.y`` from the `DOODLE <https://doodle.sourceforge.net/>`_
+project by Olivier Bettens.
+"""
+
 from .structure import Assign, AssignPair, Diagram, DiagramHeader, DooComment, Step
 from .header import (
     BottomMargin,

@@ -4,6 +4,11 @@ These classes mirror the C++ ``vertex``, ``edge``, ``face``, ``arrow``
 and ``step`` types used by the Doodle renderer.  They are *computed*
 representations populated by :mod:`pyorigami.engine` from the high-level
 command dataclasses in :mod:`pyorigami.commands`.
+
+Based on the `DOODLE <https://doodle.sourceforge.net/>`_ project by
+Olivier Bettens — a tool for creating origami diagrams using the
+DOODLE (Description Of Origami by Drawing Little Elements) markup
+language.  See ``doodle/src/`` for the original C++ sources.
 """
 
 from .constants import (

@@ -1,3 +1,10 @@
+"""Internal face and colour representation ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/face.h`` / ``face.cpp`` and
+``doodle/src/color.h`` / ``color.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

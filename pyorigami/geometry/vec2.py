@@ -1,3 +1,9 @@
+"""2-D vector helper ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/vect.h`` / ``vect.cpp``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
+
 from __future__ import annotations
 
 import math

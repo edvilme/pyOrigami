@@ -1,4 +1,8 @@
-"""Constants from C++ global_def.h and small helpers."""
+"""Constants and helpers ported from the DOODLE C++ codebase.
+
+Derived from ``doodle/src/global_def.h``.
+DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
+"""
 
 from __future__ import annotations
 
