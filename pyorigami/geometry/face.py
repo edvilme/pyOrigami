@@ -21,9 +21,9 @@ class InternalColor:
 
 
 @dataclass
-class InternalFace:
+class Face:
     symbols: list[str] = field(default_factory=list)
     color: InternalColor = field(default_factory=InternalColor)
 
-    def copy(self) -> InternalFace:
-        return InternalFace(list(self.symbols), self.color.copy())
+    def copy(self) -> Face:
+        return Face(list(self.symbols), self.color.copy())

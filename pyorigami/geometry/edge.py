@@ -18,13 +18,6 @@ class EdgeType(Enum):
     XRAY = 4
 
 
-class LimitType(Enum):
-    ALL_PERCENT = 0
-    ALL_LIMIT = 3
-    LIMIT_V1 = 2
-    LIMIT_V2 = 1
-
-
 @dataclass
 class InternalEdge:
     v1: str

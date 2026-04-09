@@ -9,15 +9,11 @@ to PDF, PNG or SVG output files.
 from __future__ import annotations
 
 import os
-import shutil
-import subprocess
 import tempfile
-from collections.abc import Callable
-from functools import partial
 from pathlib import Path
 
 from . import commands as cmd
-from .types import OutputFormat
+from .converters import CONVERTERS, OutputFormat
 
 try:
     from ._doodle import render_to_ps as _render_to_ps
@@ -45,75 +41,6 @@ def write_file(diagram: cmd.Diagram, path: str) -> None:
     with open(path, "w", encoding="utf-8") as f:
         f.write(write(diagram))
         f.write("\n")
-
-
-# ---------------------------------------------------------------------------
-# Converter registry
-# ---------------------------------------------------------------------------
-
-_CONVERTERS: dict[OutputFormat, Callable[[Path, Path], None]] = {}
-
-
-def _find_gs() -> str:
-    gs = shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c")
-    if gs is None:
-        raise RuntimeError(
-            "Ghostscript ('gs') is required for PS conversion but "
-            "was not found on this system.  Install it with your package "
-            "manager (e.g. 'apt install ghostscript' or 'brew install "
-            "ghostscript')."
-        )
-    return gs
-
-
-def _gs_convert(device: str, extra_args: list[str], ps_path: Path, out_path: Path) -> None:
-    """Convert a PostScript file using a Ghostscript device."""
-    gs = _find_gs()
-    result = subprocess.run(
-        [
-            gs,
-            "-dNOPAUSE",
-            "-dBATCH",
-            "-dSAFER",
-            f"-sDEVICE={device}",
-            *extra_args,
-            f"-sOutputFile={out_path}",
-            str(ps_path),
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"Ghostscript PS→{device} conversion failed " f"(exit {result.returncode}):\n{result.stderr}"
-        )
-
-
-def _ps_to_svg(ps_path: Path, out_path: Path) -> None:
-    """Convert a PostScript file to SVG via an intermediate PDF.
-
-    Uses Ghostscript for PS→PDF, then PyMuPDF (``pymupdf``) for PDF→SVG.
-    """
-    import pymupdf  # lazy import to avoid hard dependency at module level
-
-    fd, pdf_name = tempfile.mkstemp(suffix=".pdf")
-    os.close(fd)
-    pdf_path = Path(pdf_name)
-    try:
-        _CONVERTERS[OutputFormat.PDF](ps_path, pdf_path)
-        doc = pymupdf.open(pdf_path)
-        try:
-            page = doc[0]
-            out_path.write_text(page.get_svg_image(), encoding="utf-8")
-        finally:
-            doc.close()
-    finally:
-        pdf_path.unlink(missing_ok=True)
-
-
-_CONVERTERS[OutputFormat.PNG] = partial(_gs_convert, "png16m", ["-r150"])
-_CONVERTERS[OutputFormat.PDF] = partial(_gs_convert, "pdfwrite", ["-dCompatibilityLevel=1.4"])
-_CONVERTERS[OutputFormat.SVG] = _ps_to_svg
 
 
 # ---------------------------------------------------------------------------
@@ -156,8 +83,8 @@ def _render_native(
             output = Path(name)
         else:
             output = Path(output)
-        if format in _CONVERTERS:
-            _CONVERTERS[format](ps_path, output)
+        if format in CONVERTERS:
+            CONVERTERS[format](ps_path, output)
         else:
             raise ValueError(f"Unsupported output format: {format!r}")
         return output
@@ -242,13 +169,13 @@ def render(
 
         if format is OutputFormat.PS:
             _to_ps(str(doo_path), str(output))
-        elif format in _CONVERTERS:
+        elif format in CONVERTERS:
             fd, ps_name = tempfile.mkstemp(suffix=".ps")
             os.close(fd)
             ps_path = Path(ps_name)
             try:
                 _to_ps(str(doo_path), str(ps_path))
-                _CONVERTERS[format](ps_path, output)
+                CONVERTERS[format](ps_path, output)
             finally:
                 ps_path.unlink(missing_ok=True)
         else:

@@ -1,15 +1,19 @@
+from importlib.metadata import version as _version
+
+__version__ = _version("pyOrigami")
+
 from .types import (
     ArrowHead,
     ArrowSide,
     Color,
     Edge,
     Limit,
-    OutputFormat,
     PaperFormat,
     Side,
     Which,
     string_quote,
 )
+from .converters import OutputFormat
 from .render import write, write_file, render
 from .engine import evaluate
 from .ps import generate_ps

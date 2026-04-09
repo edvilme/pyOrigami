@@ -112,39 +112,6 @@ class PaperFormat(Enum):
         return self.value
 
 
-class OutputFormat(Enum):
-    """Output format for rendered diagrams.
-
-    * ``PS``  — PostScript (native C++ output).
-    * ``PDF`` — PDF (converted from PostScript via Ghostscript).
-    * ``PNG`` — PNG (converted from PostScript via Ghostscript).
-    * ``SVG`` — SVG (converted from PostScript via Ghostscript).
-    """
-
-    PS = "ps"
-    PDF = "pdf"
-    PNG = "png"
-    SVG = "svg"
-
-    def __str__(self) -> str:
-        return self.value
-
-    @staticmethod
-    def from_string(value: str) -> "OutputFormat":
-        """Convert a string to an :class:`OutputFormat` member (case-insensitive).
-
-        Raises
-        ------
-        ValueError
-            If *value* does not match any known format.
-        """
-        try:
-            return OutputFormat(value.lower())
-        except ValueError:
-            valid = ", ".join(repr(f.value) for f in OutputFormat)
-            raise ValueError(f"Unsupported format {value!r}; expected one of {valid}") from None
-
-
 Limit = int | Edge
 """A fold / line visual-limit parameter.
 

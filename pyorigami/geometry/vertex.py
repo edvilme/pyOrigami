@@ -155,13 +155,13 @@ class Vertex:
         i.dy = scale / 100.0 * unit_to_mm * (math.sin(rad) * v.x + math.cos(rad) * v.y)
         return i
 
-    def bissector(self, a: Vertex, b: Vertex, angle: float, scale: float) -> Vertex:
+    def bisector(self, a: Vertex, b: Vertex, angle: float, scale: float) -> Vertex:
         u = Vec2.between(self, a)
         v = Vec2.between(self, b)
         nu = u.norm()
         nv = v.norm()
         if nu < EPSILON or nv < EPSILON:
-            raise ValueError("Undefined bissector")
+            raise ValueError("Undefined bisector")
         u = u / nu
         v = v / nv
         w = u + v
@@ -240,7 +240,7 @@ class Vertex:
         else:
             chosen = p2 if angle1 < angle2 else p1
 
-        q = pivot.bissector(self, chosen, angle, scale)
+        q = pivot.bisector(self, chosen, angle, scale)
         return pivot.intersection(q, d, e, angle, scale)
 
     def distance_to_line(self, a: Vertex, b: Vertex) -> float:

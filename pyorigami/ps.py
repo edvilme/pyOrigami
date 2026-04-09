@@ -16,34 +16,46 @@ import random
 from io import StringIO
 
 from .geometry import (
-    ARROWHEADANGLE,
-    ARROWLG,
-    ARROWSPC,
-    CAPTION_HEIGHT_MM,
-    FIRST_TOP_MARGIN,
-    PAGE_HEIGHT,
-    PAGE_WIDTH,
-    PS_BORDER_WIDTH,
-    PS_FOLD_WIDTH,
-    PS_MOUNTAIN_WIDTH,
-    PS_VALLEY_WIDTH,
-    PS_XRAY_WIDTH,
     ArrowSideInternal,
     ArrowType,
     ComputedHeader,
     ComputedStep,
     EdgeType,
-    InternalArrow,
+    Arrow,
     InternalEdge,
-    InternalFace,
+    Face,
     OpenArrowSymbol,
     PushArrowSymbol,
     RepeatArrowSymbol,
     TurnType,
     Vec2,
     Vertex,
-    to_ps,
 )
+
+# ---------------------------------------------------------------------------
+# PS rendering constants (from C++ global_def.h)
+# ---------------------------------------------------------------------------
+
+PS_BORDER_WIDTH = 1
+PS_FOLD_WIDTH = 0
+PS_VALLEY_WIDTH = PS_BORDER_WIDTH
+PS_MOUNTAIN_WIDTH = PS_BORDER_WIDTH
+PS_XRAY_WIDTH = PS_BORDER_WIDTH
+
+PAGE_HEIGHT = 297
+PAGE_WIDTH = 210
+FIRST_TOP_MARGIN = 60
+CAPTION_HEIGHT_MM = 5
+
+ARROWSPC = 5
+ARROWLG = 10
+ARROWHEADANGLE = 40
+
+
+def to_ps(x: float) -> float:
+    """Convert internal units to PS cm.  50 units = 1 cm."""
+    return x / 50.0
+
 
 # Width of the random angle range for debug symbol placement.
 _DEBUG_ARC = 120
@@ -499,7 +511,7 @@ def _write_edge(out: StringIO, step: ComputedStep, e: InternalEdge, cr: float, c
 # ---------------------------------------------------------------------------
 
 
-def _write_face(out: StringIO, step: ComputedStep, f: InternalFace, cr: float, cs: float) -> None:
+def _write_face(out: StringIO, step: ComputedStep, f: Face, cr: float, cs: float) -> None:
     if not f.symbols:
         return
     out.write("gsave % begin fill face\n")
@@ -616,7 +628,7 @@ def _write_head_return_arrow(
 # ---------------------------------------------------------------------------
 
 
-def _write_simple_arrow(out: StringIO, step: ComputedStep, a: InternalArrow, cr: float, cs: float) -> None:
+def _write_simple_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, cs: float) -> None:
     v1_raw = step.get_vertex(a.v1)
     v2_raw = step.get_vertex(a.v2)
     v1 = v1_raw.apply_shift(cr, cs * 100.0)
@@ -679,7 +691,7 @@ def _write_simple_arrow(out: StringIO, step: ComputedStep, a: InternalArrow, cr:
 # ---------------------------------------------------------------------------
 
 
-def _write_return_arrow(out: StringIO, step: ComputedStep, a: InternalArrow, cr: float, cs: float) -> None:
+def _write_return_arrow(out: StringIO, step: ComputedStep, a: Arrow, cr: float, cs: float) -> None:
     begin = step.get_vertex(a.v1).apply_shift(cr, cs * 100.0)
     end = step.get_vertex(a.v2).apply_shift(cr, cs * 100.0)
     be = Vec2.between(begin, end)

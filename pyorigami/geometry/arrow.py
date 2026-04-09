@@ -31,7 +31,7 @@ class TurnType(Enum):
 
 
 @dataclass
-class InternalArrow:
+class Arrow:
     v1: str = ""
     v2: str = ""
     v1_type: ArrowType = ArrowType.NONE

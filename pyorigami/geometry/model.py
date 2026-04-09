@@ -24,8 +24,8 @@ from .constants import (
 )
 from .vertex import Vertex
 from .edge import EdgeType, InternalEdge
-from .arrow import InternalArrow, TurnType
-from .face import InternalColor, InternalFace
+from .arrow import Arrow, TurnType
+from .face import InternalColor, Face
 from .symbols import ArrowSymbol
 
 
@@ -55,8 +55,8 @@ class ComputedStep:
     captions: list[str] = field(default_factory=list)
     vertices: list[Vertex] = field(default_factory=list)
     lines: list[InternalEdge] = field(default_factory=list)
-    arrows: list[InternalArrow] = field(default_factory=list)
-    faces: list[InternalFace] = field(default_factory=list)
+    arrows: list[Arrow] = field(default_factory=list)
+    faces: list[Face] = field(default_factory=list)
     arrow_symbols: list[ArrowSymbol] = field(default_factory=list)
     turn: TurnType = TurnType.NONE
     rotate: float = 0.0
@@ -78,10 +78,6 @@ class ComputedStep:
             if v.get_name() == name:
                 return v
         raise KeyError(f"Vertex {name!r} not found")
-
-    def ref_vertex(self, name: str) -> Vertex:
-        """Return vertex by name (mutable reference)."""
-        return self.get_vertex(name)
 
     def search_edge(self, s1: str, s2: str) -> int:
         for i, e in enumerate(self.lines):

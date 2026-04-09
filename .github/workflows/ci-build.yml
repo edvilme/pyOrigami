@@ -30,3 +30,6 @@ jobs:
 
       - name: Verify import
         run: python -c "import pyorigami"
+
+      - name: Smoke test (verify_boat)
+        run: python examples/verify_boat.py

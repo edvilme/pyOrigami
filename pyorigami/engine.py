@@ -29,10 +29,10 @@ from .geometry import (
     ComputedHeader,
     ComputedStep,
     EdgeType,
-    InternalArrow,
+    Arrow,
     InternalColor,
     InternalEdge,
-    InternalFace,
+    Face,
     OpenArrowSymbol,
     PushArrowSymbol,
     RepeatArrowSymbol,
@@ -60,15 +60,6 @@ _ARROW_SIDE_MAP = {
     ArrowSide.LEFT: ArrowSideInternal.LEFT,
     ArrowSide.RIGHT: ArrowSideInternal.RIGHT,
 }
-
-_EDGE_TYPE_MAP = {
-    "valley": EdgeType.VALLEY,
-    "mountain": EdgeType.MOUNTAIN,
-    "fold": EdgeType.FOLD,
-    "border": EdgeType.BORDER,
-    "xray": EdgeType.XRAY,
-}
-
 
 def _resolve_color(c, header: ComputedHeader) -> InternalColor:
     """Resolve a Color value (tuple or 'front'/'back') to InternalColor."""
@@ -354,7 +345,7 @@ class Engine:
             self._labels[item.name] = self._current_index - 1
             return
         if isinstance(item, cmd.Text):
-            v = s.ref_vertex(item.vertex)
+            v = s.get_vertex(item.vertex)
             v.add_text(item.text)
             return
 
@@ -363,12 +354,12 @@ class Engine:
             self._read_move(item)
             return
         if isinstance(item, cmd.Shift):
-            v = s.ref_vertex(item.vertex)
+            v = s.get_vertex(item.vertex)
             v.dx = item.dx
             v.dy = item.dy
             return
         if isinstance(item, cmd.Unshift):
-            v = s.ref_vertex(item.vertex)
+            v = s.get_vertex(item.vertex)
             v.dx = 0.0
             v.dy = 0.0
             return
@@ -568,19 +559,19 @@ class Engine:
             s.vertices.append(v)
 
         elif isinstance(expr, cmd.LineToLine):
-            # 3-arg form: bissector
+            # 3-arg form: bisector
             if isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, str):
                 raise ValueError("LineToLine 3-vertex form must be used with AssignPair or have an edge arg4")
             elif isinstance(expr.arg1, str) and isinstance(expr.arg2, str) and isinstance(expr.arg3, Edge):
-                # bissector: arg1=common vertex, arg2=vertex, arg3=edge
+                # bisector: arg1=common vertex, arg2=vertex, arg3=edge
                 va = s.get_vertex(expr.arg1)
                 vb = s.get_vertex(expr.arg2)
                 if expr.arg4 is None:
-                    raise ValueError("LineToLine bissector form requires arg4 (edge)")
+                    raise ValueError("LineToLine bisector form requires arg4 (edge)")
                 # Actually the 5-arg form: \line_to_line(a, b, c, [d,e])
                 # arg1=a, arg2=b, arg3=c (vertex), arg4=[d,e]
                 pass
-            # Handle line_to_line(a, b, c, [d,e]) -- bissector form
+            # Handle line_to_line(a, b, c, [d,e]) -- bisector form
             if (
                 isinstance(expr.arg1, str)
                 and isinstance(expr.arg2, str)
@@ -592,7 +583,7 @@ class Engine:
                 vc = s.get_vertex(expr.arg3)
                 vd = s.get_vertex(expr.arg4.v1)
                 ve = s.get_vertex(expr.arg4.v2)
-                v_biss = va.bissector(vb, vc, angle, sc)
+                v_biss = va.bisector(vb, vc, angle, sc)
                 vr = va.intersection(v_biss, vd, ve, angle, sc)
                 vr.name = a.name
                 s.vertices.append(vr)
@@ -645,7 +636,7 @@ class Engine:
                     in_v = va.intersection(vb, vc, vd, angle, sc)
                     va1 = vb if in_v == va else va
                     vc1 = vd if in_v == vc else vc
-                    v0 = in_v.bissector(va1, vc1, angle, sc)
+                    v0 = in_v.bisector(va1, vc1, angle, sc)
                     v1 = in_v.intersection(v0, ve, vf, angle, sc)
                     v2 = in_v.intersection(v0, vg, vh, angle, sc)
 
@@ -693,8 +684,8 @@ class Engine:
             e1 = s.get_vertex(expr.center_or_edge.v1)
             e2 = s.get_vertex(expr.center_or_edge.v2)
             # Compute center from bisectors
-            p = v1.bissector(v2, v3, angle, sc)
-            q = v2.bissector(v1, v3, angle, sc)
+            p = v1.bisector(v2, v3, angle, sc)
+            q = v2.bisector(v1, v3, angle, sc)
             center = v1.intersection(p, v2, q, angle, sc)
             temp = center.projection(v1, v2)
             v = center.intersection(temp, e1, e2, angle, sc)
@@ -716,8 +707,8 @@ class Engine:
             e1 = v1.copy()
             e2 = v2.copy()
 
-        p = v1.bissector(v2, v3, angle, sc)
-        q = v2.bissector(v1, v3, angle, sc)
+        p = v1.bisector(v2, v3, angle, sc)
+        q = v2.bisector(v1, v3, angle, sc)
         center = v1.intersection(p, v2, q, angle, sc)
 
         temp = center.projection(v1, v2)
@@ -894,7 +885,7 @@ class Engine:
     def _read_fill(self, item: cmd.Fill) -> None:
         s = self._step
         color = _resolve_color(str(item.side), self.header)
-        f = InternalFace(list(item.vertices), color)
+        f = Face(list(item.vertices), color)
         s.faces.append(f)
 
     def _read_unfill(self, item: cmd.Unfill) -> None:
@@ -923,7 +914,7 @@ class Engine:
 
     def _read_move(self, item: cmd.Move) -> None:
         s = self._step
-        vsrc = s.ref_vertex(item.src)
+        vsrc = s.get_vertex(item.src)
         if isinstance(item.dest, Edge):
             v1 = s.get_vertex(item.dest.v1)
             v2 = s.get_vertex(item.dest.v2)
@@ -958,9 +949,9 @@ class Engine:
             r = v.symmetry(va, vb, angle, sc)
             r.name = _gen_sym(s, v.get_name())
             s.vertices.append(r)
-            s.arrows.append(InternalArrow(item.src, r.get_name(), v1t, v2t, side, True, arc))
+            s.arrows.append(Arrow(item.src, r.get_name(), v1t, v2t, side, True, arc))
         else:
-            s.arrows.append(InternalArrow(item.src, item.dst, v1t, v2t, side, True, arc))
+            s.arrows.append(Arrow(item.src, item.dst, v1t, v2t, side, True, arc))
 
     def _read_return_arrow(self, item: cmd.ReturnArrow) -> None:
         s = self._step
@@ -983,7 +974,7 @@ class Engine:
         end.name = _gen_sym(s, "era")
         s.vertices.append(begin)
         s.vertices.append(end)
-        s.arrows.append(InternalArrow(begin.get_name(), end.get_name(), v1t, v2t, side, False, ratio))
+        s.arrows.append(Arrow(begin.get_name(), end.get_name(), v1t, v2t, side, False, ratio))
 
     def _read_open_arrow(self, item: cmd.OpenArrow) -> None:
         s = self._step
