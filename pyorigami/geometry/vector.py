@@ -6,48 +6,72 @@ DOODLE — https://doodle.sourceforge.net/ — by Olivier Bettens.
 
 from __future__ import annotations
 
-import math
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 if TYPE_CHECKING:
     from .vertex import Vertex
 
 
-@dataclass
 class Vector:
-    x: float = 0.0
-    y: float = 0.0
+    """2-D vector backed by a NumPy array for accurate and efficient operations."""
+
+    __slots__ = ("_data",)
+
+    def __init__(self, x: float = 0.0, y: float = 0.0) -> None:
+        self._data = np.array([x, y], dtype=float)
+
+    @property
+    def x(self) -> float:
+        return float(self._data[0])
+
+    @property
+    def y(self) -> float:
+        return float(self._data[1])
+
+    def __repr__(self) -> str:
+        return f"Vector(x={self.x}, y={self.y})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Vector):
+            return NotImplemented
+        return bool(np.array_equal(self._data, other._data))
 
     def __add__(self, other: Vector) -> Vector:
-        return Vector(self.x + other.x, self.y + other.y)
+        r = self._data + other._data
+        return Vector(r[0], r[1])
 
     def __sub__(self, other: Vector) -> Vector:
-        return Vector(self.x - other.x, self.y - other.y)
+        r = self._data - other._data
+        return Vector(r[0], r[1])
 
     def __mul__(self, scalar: float) -> Vector:
-        return Vector(self.x * scalar, self.y * scalar)
+        r = self._data * scalar
+        return Vector(r[0], r[1])
 
     def __rmul__(self, scalar: float) -> Vector:
-        return Vector(self.x * scalar, self.y * scalar)
+        return self.__mul__(scalar)
 
     def __truediv__(self, scalar: float) -> Vector:
-        return Vector(self.x / scalar, self.y / scalar)
+        r = self._data / scalar
+        return Vector(r[0], r[1])
 
     def __neg__(self) -> Vector:
-        return Vector(-self.x, -self.y)
+        r = -self._data
+        return Vector(r[0], r[1])
 
     def dot(self, other: Vector) -> float:
-        return self.x * other.x + self.y * other.y
+        return float(np.dot(self._data, other._data))
 
     def norm(self) -> float:
-        return math.sqrt(self.x * self.x + self.y * self.y)
+        return float(np.linalg.norm(self._data))
 
     def sqr_norm(self) -> float:
-        return self.x * self.x + self.y * self.y
+        return float(np.dot(self._data, self._data))
 
     def ortho(self) -> Vector:
-        return Vector(-self.y, self.x)
+        return Vector(-self._data[1], self._data[0])
 
     @staticmethod
     def between(v1: Vertex, v2: Vertex) -> Vector:
