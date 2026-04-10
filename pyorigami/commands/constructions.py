@@ -8,16 +8,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..parsing import DoodleParseableCommand
 from ..types import Edge, Which
 
 
 @dataclass
-class Middle:
+class Middle(DoodleParseableCommand):
     """Creates a new vertex at the midpoint of two existing vertices.
 
     The two given vertices need not have a physical edge between them.
     Maps to ``\\middle(v1, v2)``.  Wrap in ``Assign`` to capture the result.
     """
+
+    DOO_KEYWORD = "middle"
 
     v1: str
     v2: str
@@ -25,9 +28,13 @@ class Middle:
     def to_doo(self) -> str:
         return f"\\middle({self.v1}, {self.v2})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Middle:
+        return cls(v1=args[0], v2=args[1])
+
 
 @dataclass
-class Fraction:
+class Fraction(DoodleParseableCommand):
     """Creates a new vertex at a fractional position along a segment.
 
     An extension of ``\\middle``; the new vertex is located at
@@ -37,6 +44,8 @@ class Fraction:
     ``Assign`` to capture the result.
     """
 
+    DOO_KEYWORD = "fraction"
+
     v1: str
     v2: str
     numerator: int
@@ -45,9 +54,13 @@ class Fraction:
     def to_doo(self) -> str:
         return f"\\fraction({self.v1}, {self.v2}, {self.numerator}, {self.denominator})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Fraction:
+        return cls(v1=args[0], v2=args[1], numerator=int(args[2]), denominator=int(args[3]))
+
 
 @dataclass
-class Intersection:
+class Intersection(DoodleParseableCommand):
     """Returns the intersection vertex of two edges (lines).
 
     The intersection is computed between the full lines through each pair
@@ -59,6 +72,8 @@ class Intersection:
     capture the result.
     """
 
+    DOO_KEYWORD = "intersection"
+
     edge1: Edge
     edge2: Edge
 
@@ -69,9 +84,15 @@ class Intersection:
     def to_doo(self) -> str:
         return f"\\intersection({self.edge1.v1}, {self.edge1.v2}, {self.edge2.v1}, {self.edge2.v2})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Intersection:
+        if len(args) == 2 and isinstance(args[0], Edge) and isinstance(args[1], Edge):
+            return cls(edge1=args[0], edge2=args[1])
+        return cls(edge1=Edge(args[0], args[1]), edge2=Edge(args[2], args[3]))
+
 
 @dataclass
-class InterCut:
+class InterCut(DoodleParseableCommand):
     """Computes the intersection of two edges and cuts the first edge at that point.
 
     A shortcut combining ``\\intersection`` and ``\\cut``.  After this
@@ -81,15 +102,21 @@ class InterCut:
     capture the result.
     """
 
+    DOO_KEYWORD = "inter_cut"
+
     edge1: Edge
     edge2: Edge
 
     def to_doo(self) -> str:
         return f"\\inter_cut({self.edge1.to_doo()}, {self.edge2.to_doo()})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> InterCut:
+        return cls(edge1=args[0], edge2=args[1])
+
 
 @dataclass
-class PointToPoint:
+class PointToPoint(DoodleParseableCommand):
     """Computes fold-line vertices for bringing one point onto another.
 
     Given a *moving* vertex and a *dest* vertex, returns the two
@@ -99,6 +126,8 @@ class PointToPoint:
     ``AssignPair`` to capture both results.
     """
 
+    DOO_KEYWORD = "point_to_point"
+
     moving: str
     dest: str
     edge1: Edge
@@ -107,9 +136,13 @@ class PointToPoint:
     def to_doo(self) -> str:
         return f"\\point_to_point({self.moving}, {self.dest}, {self.edge1.to_doo()}, {self.edge2.to_doo()})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> PointToPoint:
+        return cls(moving=args[0], dest=args[1], edge1=args[2], edge2=args[3])
+
 
 @dataclass
-class PointToLine:
+class PointToLine(DoodleParseableCommand):
     """Computes the fold-line vertex for bringing a point onto a line.
 
     Given a *moving* vertex and a *pivot*, finds where the fold line
@@ -119,6 +152,8 @@ class PointToLine:
     Maps to ``\\point_to_line(moving, pivot, limit_edge, edge[, which])``.
     Wrap in ``Assign`` to capture the result.
     """
+
+    DOO_KEYWORD = "point_to_line"
 
     moving: str
     pivot: str
@@ -132,9 +167,19 @@ class PointToLine:
             args.append(str(self.which))
         return f"\\point_to_line({', '.join(args)})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> PointToLine:
+        which = Which.FIRST
+        if len(args) > 4:
+            try:
+                which = Which(args[4])
+            except ValueError:
+                pass
+        return cls(moving=args[0], pivot=args[1], limit_edge=args[2], edge=args[3], which=which)
+
 
 @dataclass
-class LineToLine:
+class LineToLine(DoodleParseableCommand):
     """Computes vertices where one edge meets another via their median or bisector.
 
     **Syntax 1 (median, 4 edges):** computes the median line between
@@ -149,6 +194,8 @@ class LineToLine:
     or ``\\line_to_line(v1, v2, v3, edge)``.  Wrap in ``AssignPair``
     or ``Assign`` depending on the syntax used.
     """
+
+    DOO_KEYWORD = "line_to_line"
 
     arg1: Edge | str
     arg2: Edge | str
@@ -165,9 +212,14 @@ class LineToLine:
             parts.append(self.arg4.to_doo() if isinstance(self.arg4, Edge) else self.arg4)
         return f"\\line_to_line({', '.join(parts)})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> LineToLine:
+        arg4 = args[3] if len(args) > 3 else None
+        return cls(arg1=args[0], arg2=args[1], arg3=args[2], arg4=arg4)
+
 
 @dataclass
-class Symmetry:
+class Symmetry(DoodleParseableCommand):
     """Creates a new vertex as the mirror image of a point through an axis.
 
     The axis is given as an ``Edge`` (pair of vertices); the edge need
@@ -176,20 +228,28 @@ class Symmetry:
     capture the result.
     """
 
+    DOO_KEYWORD = "symmetry"
+
     vertex: str
     edge: Edge
 
     def to_doo(self) -> str:
         return f"\\symmetry({self.vertex}, {self.edge.to_doo()})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Symmetry:
+        return cls(vertex=args[0], edge=args[1])
+
 
 @dataclass
-class Parallel:
+class Parallel(DoodleParseableCommand):
     """Creates a vertex where a line parallel to *edge* through *vertex* meets *limit_edge*.
 
     Maps to ``\\parallel(edge, vertex, limit_edge)``.  Wrap in
     ``Assign`` to capture the result.
     """
+
+    DOO_KEYWORD = "parallel"
 
     edge: Edge
     vertex: str
@@ -198,9 +258,13 @@ class Parallel:
     def to_doo(self) -> str:
         return f"\\parallel({self.edge.to_doo()}, {self.vertex}, {self.limit_edge.to_doo()})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Parallel:
+        return cls(edge=args[0], vertex=args[1], limit_edge=args[2])
+
 
 @dataclass
-class Perpendicular:
+class Perpendicular(DoodleParseableCommand):
     """Creates a vertex where a line perpendicular to *edge* from *vertex* meets another line.
 
     Without *limit_edge*, the returned point lies on the reference edge
@@ -209,6 +273,8 @@ class Perpendicular:
     Maps to ``\\perpendicular(edge, vertex[, limit_edge])``.  Wrap in
     ``Assign`` to capture the result.
     """
+
+    DOO_KEYWORD = "perpendicular"
 
     edge: Edge
     vertex: str
@@ -219,9 +285,14 @@ class Perpendicular:
             return f"\\perpendicular({self.edge.to_doo()}, {self.vertex}, {self.limit_edge.to_doo()})"
         return f"\\perpendicular({self.edge.to_doo()}, {self.vertex})"
 
+    @classmethod
+    def from_doo_args(cls, args: list) -> Perpendicular:
+        limit = args[2] if len(args) > 2 else None
+        return cls(edge=args[0], vertex=args[1], limit_edge=limit)
+
 
 @dataclass
-class RabbitEar:
+class RabbitEar(DoodleParseableCommand):
     """Computes vertices for a rabbit-ear fold on a triangle.
 
     The rabbit-ear fold uses three valley folds from each corner to a
@@ -242,6 +313,8 @@ class RabbitEar:
     ``AssignPair`` or ``Assign`` depending on the syntax used.
     """
 
+    DOO_KEYWORD = "rabbit_ear"
+
     moving: str
     dest: str
     v3: str
@@ -256,3 +329,10 @@ class RabbitEar:
         if self.edge is not None:
             args.append(self.edge.to_doo())
         return f"\\rabbit_ear({', '.join(args)})"
+
+    @classmethod
+    def from_doo_args(cls, args: list) -> RabbitEar:
+        moving, dest, v3 = args[0], args[1], args[2]
+        center_or_edge = args[3] if len(args) > 3 else None
+        edge = args[4] if len(args) > 4 else None
+        return cls(moving=moving, dest=dest, v3=v3, center_or_edge=center_or_edge, edge=edge)

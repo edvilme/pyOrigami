@@ -30,3 +30,33 @@ jobs:
 
       - name: Verify import
         run: python -c "import pyorigami"
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ghostscript
+
+      - name: Install build dependencies
+        run: pip install pybind11 setuptools
+
+      - name: Install package
+        run: pip install --no-build-isolation -e .
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Run tests
+        run: python -m pytest tests/ -v

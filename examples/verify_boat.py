@@ -1,6 +1,7 @@
 """Verify DSL ergonomics by modelling simple_boat.doo steps 1-3."""
 
 from pyorigami import *  # noqa: F403
+from pyorigami import parsing
 
 my_color = (60, 85, 60)
 
@@ -88,3 +89,6 @@ boat = Diagram(
 if __name__ == "__main__":
     print(write(boat))
     render(boat, OutputFormat.PDF, "simple_boat.pdf", native=True)
+    pajarita = parsing.parse_file("examples/pajarita.doo")
+
+    render(pajarita, OutputFormat.PDF, "pajarita.pdf", native=True)
