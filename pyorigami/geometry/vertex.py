@@ -9,6 +9,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+import numpy as np
+
 from .constants import EPSILON
 from .vector import Vector
 
@@ -49,14 +51,14 @@ class Vertex:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Vertex):
             return NotImplemented
-        n = math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
+        n = np.hypot(other.x - self.x, other.y - self.y)
         return -EPSILON < n < EPSILON
 
     __hash__ = None
 
     def equivalent(self, other: Vertex) -> bool:
-        n1 = math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
-        n2 = math.sqrt((other.dx - self.dx) ** 2 + (other.dy - self.dy) ** 2)
+        n1 = np.hypot(other.x - self.x, other.y - self.y)
+        n2 = np.hypot(other.dx - self.dx, other.dy - self.dy)
         return (-EPSILON < n1 < EPSILON) and (-EPSILON < n2 < EPSILON)
 
     def apply_shift(self, angle: float, scale: float) -> Vertex:
@@ -66,8 +68,9 @@ class Vertex:
         """
         rad = angle * math.pi / 180.0
         mm_to_unit = 5.0
-        new_x = self.x + 100.0 / scale * (mm_to_unit * (self.dx * math.cos(rad) + self.dy * math.sin(rad)))
-        new_y = self.y + 100.0 / scale * (mm_to_unit * (-self.dx * math.sin(rad) + self.dy * math.cos(rad)))
+        cos_a, sin_a = np.cos(rad), np.sin(rad)
+        new_x = self.x + 100.0 / scale * (mm_to_unit * (self.dx * cos_a + self.dy * sin_a))
+        new_y = self.y + 100.0 / scale * (mm_to_unit * (-self.dx * sin_a + self.dy * cos_a))
         return Vertex(self.name, new_x, new_y)
 
     def get_angle_from_horizontal(self, v: Vertex, angle: float, scale: float) -> float:

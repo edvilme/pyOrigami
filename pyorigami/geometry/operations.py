@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
+
 from .constants import EPSILON
 from .vector import Vector
 from .vertex import Vertex
@@ -23,8 +25,7 @@ from .vertex import Vertex
 
 def _basic_symmetry(point: Vertex, a: Vertex, b: Vertex) -> Vertex:
     u = Vector.between(a, b)
-    n = u.norm()
-    u = u / n
+    u = u / u.norm()
     v_a_self = Vector.between(a, point)
     proj_len = v_a_self.dot(u)
     q = Vertex("null", a.x + proj_len * u.x, a.y + proj_len * u.y)
@@ -38,12 +39,13 @@ def _basic_intersection(v1: Vertex, v2: Vertex, v3: Vertex, v4: Vertex) -> Verte
     a2 = v3.y - v4.y
     b2 = v4.x - v3.x
     c2 = a2 * v4.x + b2 * v4.y
-    det = a1 * b2 - a2 * b1
-    if det == 0:
+    A = np.array([[a1, b1], [a2, b2]])
+    rhs = np.array([c1, c2])
+    try:
+        x, y = np.linalg.solve(A, rhs)
+    except np.linalg.LinAlgError:
         raise ValueError("Lines are parallel (det=0)")
-    _x = (c1 * b2 - b1 * c2) / det
-    _y = (a1 * c2 - a2 * c1) / det
-    return Vertex("null", _x, _y)
+    return Vertex("null", float(x), float(y))
 
 
 def _compute_shift(base: Vertex, shifted: Vertex, angle: float, scale: float) -> None:
