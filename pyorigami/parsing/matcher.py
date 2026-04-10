@@ -25,7 +25,10 @@ def _build_command(parsed: CommandStmt | AssignStmt | AssignPairStmt):
     if cls is None:
         return None
 
-    obj = cls.from_doo_args(parsed.args)
+    try:
+        obj = cls.from_doo_args(parsed.args)
+    except (ValueError, TypeError, IndexError):
+        return None
 
     if isinstance(parsed, AssignStmt):
         from ..commands.structure import Assign

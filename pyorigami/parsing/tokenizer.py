@@ -28,8 +28,12 @@ def tokenize_args(text: str) -> list[str | int | float | Edge]:
             continue
         # Edge: [v1, v2]
         if c == "[":
-            j = text.index("]", i)
+            j = text.find("]", i)
+            if j == -1:
+                break
             parts = [p.strip() for p in text[i + 1 : j].split(",")]
+            if len(parts) != 2 or not parts[0] or not parts[1]:
+                break
             tokens.append(Edge(parts[0], parts[1]))
             i = j + 1
         # Quoted string
@@ -59,6 +63,14 @@ def tokenize_args(text: str) -> list[str | int | float | Edge]:
         # Identifier / symbol / keyword
         elif c.isalpha() or c == "_":
             m = re.match(r"[A-Za-z_][A-Za-z0-9_]*", text[i:])
+            if m:
+                tokens.append(m.group())
+                i += len(m.group())
+            else:
+                i += 1
+        # Backslash: macro reference like \my_color — preserve the backslash
+        elif c == "\\":
+            m = re.match(r"\\[A-Za-z_][A-Za-z0-9_]*", text[i:])
             if m:
                 tokens.append(m.group())
                 i += len(m.group())

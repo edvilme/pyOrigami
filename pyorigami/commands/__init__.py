@@ -2,8 +2,8 @@
 
 Each dataclass maps to a DOODLE operator and can serialize itself back
 to ``.doo`` text via :meth:`to_doo`.  Classes that inherit from
-:class:`~pyorigami.parsing.Matchable` can also recognise their own
-syntax via :meth:`match` and :meth:`from_doo_args`.
+:class:`~pyorigami.parsing.DoodleParseableCommand` can also recognise
+their own syntax via :meth:`from_doo_args`.
 
 Based on the grammar defined in ``doodle/src/parser.y`` from the
 `DOODLE <https://doodle.sourceforge.net/>`_ project by Olivier Bettens.

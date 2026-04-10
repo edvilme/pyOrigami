@@ -71,7 +71,10 @@ _PAIR_ASSIGN_RE = re.compile(r"\[\s*([A-Za-z_]\w*)\s*,\s*([A-Za-z_]\w*)\s*\]\s*=
 
 
 def _find_matching_paren(text: str, open_idx: int) -> int:
-    """Return index of the ``')'`` matching the ``'('`` at *open_idx*."""
+    """Return index of the ``')'`` matching the ``'('`` at *open_idx*.
+
+    Returns ``-1`` if no matching closing parenthesis is found.
+    """
     depth = 1
     i = open_idx + 1
     in_string = False
@@ -91,16 +94,20 @@ def _find_matching_paren(text: str, open_idx: int) -> int:
             elif c == ")":
                 depth -= 1
         i += 1
+    if depth > 0:
+        return -1
     return i - 1
 
 
 def _strip_trailing_comment(text: str) -> str:
     """Remove a trailing ``% ...`` comment that isn't inside a string."""
     in_str = False
-    for idx in range(len(text)):
+    idx = 0
+    while idx < len(text):
         c = text[idx]
         if in_str:
             if c == "\\":
+                idx += 2 if idx + 1 < len(text) else 1  # skip the escaped character
                 continue
             if c == '"':
                 in_str = False
@@ -109,6 +116,7 @@ def _strip_trailing_comment(text: str) -> str:
                 in_str = True
             elif c == "%":
                 return text[:idx].rstrip()
+        idx += 1
     return text
 
 
@@ -148,6 +156,8 @@ def parse_statement(text: str) -> ParsedStmt | None:
         n1, n2, keyword = m.group(1), m.group(2), m.group(3)
         paren_idx = stmt.index("(", m.end() - 1)
         close_idx = _find_matching_paren(stmt, paren_idx)
+        if close_idx == -1:
+            return None
         args = tokenize_args(stmt[paren_idx + 1 : close_idx])
         return AssignPairStmt(names=(n1, n2), keyword=keyword, args=args)
 
@@ -157,6 +167,8 @@ def parse_statement(text: str) -> ParsedStmt | None:
         name, keyword = m.group(1), m.group(2)
         paren_idx = stmt.index("(", m.end() - 1)
         close_idx = _find_matching_paren(stmt, paren_idx)
+        if close_idx == -1:
+            return None
         args = tokenize_args(stmt[paren_idx + 1 : close_idx])
         return AssignStmt(name=name, keyword=keyword, args=args)
 
@@ -166,6 +178,8 @@ def parse_statement(text: str) -> ParsedStmt | None:
         keyword = m.group(1)
         paren_idx = stmt.index("(", m.start())
         close_idx = _find_matching_paren(stmt, paren_idx)
+        if close_idx == -1:
+            return None
         args = tokenize_args(stmt[paren_idx + 1 : close_idx])
         return CommandStmt(keyword=keyword, args=args)
 

@@ -42,7 +42,10 @@ def parse_text(source: str) -> "Diagram":
         if not stripped:
             continue
 
-        parsed = parse_statement(stripped)
+        try:
+            parsed = parse_statement(stripped)
+        except (ValueError, TypeError, IndexError):
+            continue
         if parsed is None:
             continue
 
@@ -68,7 +71,10 @@ def parse_text(source: str) -> "Diagram":
             current.append(DooComment(text=parsed.text))
             continue
 
-        obj = _build_command(parsed)
+        try:
+            obj = _build_command(parsed)
+        except (ValueError, TypeError, IndexError):
+            continue
         if obj is not None:
             current.append(obj)
 
