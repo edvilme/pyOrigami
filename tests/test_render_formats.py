@@ -19,12 +19,11 @@ from pyorigami.parsing import parse_file
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 DOO_FILE = EXAMPLES_DIR / "simple_boat.doo"
 
-_has_gs = bool(
-    shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c")
-)
+_has_gs = bool(shutil.which("gs") or shutil.which("gswin64c") or shutil.which("gswin32c"))
 
 try:
     import pymupdf  # noqa: F401
+
     _has_pymupdf = True
 except ImportError:
     _has_pymupdf = False
@@ -37,6 +36,7 @@ def diagram():
 
 
 # ── .doo round-trip ──────────────────────────────────────────────────────
+
 
 def test_parse_and_write_doo(diagram, tmp_path):
     """Parsing a .doo file and serializing back produces valid .doo text."""
@@ -57,6 +57,7 @@ def test_parse_and_write_doo(diagram, tmp_path):
 
 # ── PostScript ───────────────────────────────────────────────────────────
 
+
 def test_render_ps(diagram, tmp_path):
     """Rendering to PostScript produces a non-empty .ps file."""
     out = tmp_path / "output.ps"
@@ -68,6 +69,7 @@ def test_render_ps(diagram, tmp_path):
 
 
 # ── PDF (requires Ghostscript) ───────────────────────────────────────────
+
 
 @pytest.mark.skipif(not _has_gs, reason="Ghostscript not found")
 def test_render_pdf(diagram, tmp_path):
@@ -83,6 +85,7 @@ def test_render_pdf(diagram, tmp_path):
 
 # ── PNG (requires Ghostscript) ───────────────────────────────────────────
 
+
 @pytest.mark.skipif(not _has_gs, reason="Ghostscript not found")
 def test_render_png(diagram, tmp_path):
     """Rendering to PNG produces a non-empty file with a PNG signature."""
@@ -96,6 +99,7 @@ def test_render_png(diagram, tmp_path):
 
 
 # ── SVG (requires Ghostscript + PyMuPDF) ─────────────────────────────────
+
 
 @pytest.mark.skipif(not _has_gs, reason="Ghostscript not found")
 @pytest.mark.skipif(not _has_pymupdf, reason="PyMuPDF not installed")
