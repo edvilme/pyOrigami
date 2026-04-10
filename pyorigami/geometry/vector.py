@@ -71,7 +71,7 @@ class Vector:
         return float(np.dot(self._data, self._data))
 
     def ortho(self) -> Vector:
-        return Vector(-self.y, self.x)
+        return Vector(-self._data[1], self._data[0])
 
     @staticmethod
     def between(v1: Vertex, v2: Vertex) -> Vector:

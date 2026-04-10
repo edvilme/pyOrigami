@@ -39,10 +39,10 @@ def _basic_intersection(v1: Vertex, v2: Vertex, v3: Vertex, v4: Vertex) -> Verte
     a2 = v3.y - v4.y
     b2 = v4.x - v3.x
     c2 = a2 * v4.x + b2 * v4.y
-    A = np.array([[a1, b1], [a2, b2]])
+    matrix = np.array([[a1, b1], [a2, b2]])
     rhs = np.array([c1, c2])
     try:
-        x, y = np.linalg.solve(A, rhs)
+        x, y = np.linalg.solve(matrix, rhs)
     except np.linalg.LinAlgError:
         raise ValueError("Lines are parallel (det=0)")
     return Vertex("null", float(x), float(y))
